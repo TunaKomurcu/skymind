@@ -18,7 +18,7 @@ Kısıtlar: **ücretsiz** araçlar, RTX 4060 Laptop (8 GB VRAM), 32 GB RAM, yaln
 - [x] git init, repo iskelesi
 - [x] Plan şeması (Pydantic + JSON Schema) ve testleri
 - [x] Eval metrikleri (JSON geçerlilik, alan doğruluğu, halüsinasyon)
-- [ ] MLflow yerel kurulum + `log_run` yardımcısı
+- [x] MLflow yerel kurulum + `log_run` yardımcısı
 - [ ] Sentetik veri hattı (şablon motoru → paraphrase → doğrulama)
 - [ ] Altın test seti + pilot üretim (~500)
 - [ ] ADR-001 (model ve araç seçimleri)
