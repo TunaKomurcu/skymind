@@ -1,0 +1,26 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+dist/
+*.egg-info/
+
+# Ortam / sırlar
+.env
+*.key
+
+# Büyük/üretilen artefaktlar (betikleri repoda, çıktıları dışarıda)
+mlruns/
+mlartifacts/
+outputs/
+checkpoints/
+*.gguf
+*.safetensors
+*.onnx
+*.bin
+data/raw/
+data/cache/
