@@ -218,7 +218,7 @@ def frag_patrol(rng: random.Random, omit: frozenset[str]) -> Frag:
     parts: list[str] = []
     if "waypoints" not in omit:
         joined = " ile ".join(names) if n == 2 else ", ".join(names[:-1]) + " ve " + names[-1]
-        parts.append(f"{joined} arasında" if n == 2 else f"{joined} noktaları arasında")
+        parts.append(f"{joined} arasında")
     if "altitude" not in omit:
         parts.append(alt_phrase(a, rng))
     if loops != 1:
