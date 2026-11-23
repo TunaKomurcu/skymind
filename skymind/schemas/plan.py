@@ -55,11 +55,14 @@ class NamedLocation(_Strict):
 
 
 class RelativeLocation(_Strict):
-    """Üsse (home) ya da mevcut konuma göre yön + mesafe (ör. "kuzeyde 2 km")."""
+    """Üsse (home) ya da mevcut konuma göre yön (+ opsiyonel mesafe).
+
+    "kuzeydeki bölge" -> yalnızca yön; "kuzeyde 2 km" -> yön + mesafe.
+    """
 
     kind: Literal["relative"] = "relative"
     direction: Direction
-    distance_m: float = Field(gt=0, le=MAX_RADIUS_M)
+    distance_m: float | None = Field(default=None, gt=0, le=MAX_RADIUS_M)
     origin: Literal["home", "current"] = "home"
 
 
