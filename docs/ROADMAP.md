@@ -16,8 +16,8 @@ Kısıtlar: **ücretsiz** araçlar, RTX 4060 Laptop (8 GB VRAM), 32 GB RAM, yaln
 
 ## Sprint 1 (Faz 0 + Faz 1 başı)
 - [x] git init, repo iskelesi
-- [ ] Plan şeması (Pydantic + JSON Schema) ve testleri
-- [ ] Eval metrikleri (JSON geçerlilik, alan doğruluğu, halüsinasyon)
+- [x] Plan şeması (Pydantic + JSON Schema) ve testleri
+- [x] Eval metrikleri (JSON geçerlilik, alan doğruluğu, halüsinasyon)
 - [ ] MLflow yerel kurulum + `log_run` yardımcısı
 - [ ] Sentetik veri hattı (şablon motoru → paraphrase → doğrulama)
 - [ ] Altın test seti + pilot üretim (~500)
