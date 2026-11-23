@@ -30,6 +30,7 @@ def main() -> None:
     ap.add_argument("--batch", type=int, default=8)
     ap.add_argument("--accum", type=int, default=2)
     ap.add_argument("--max-length", type=int, default=512)
+    ap.add_argument("--resume", action="store_true", help="son checkpoint'ten devam et")
     a = ap.parse_args()
 
     # ağır importlar burada: CLI --help hızlı kalsın
@@ -98,7 +99,7 @@ def main() -> None:
         eval_strategy="steps",
         eval_steps=150,
         save_strategy="steps",
-        save_steps=150,
+        save_steps=50,
         save_total_limit=2,
         report_to=["mlflow"],
         seed=0,
@@ -111,7 +112,7 @@ def main() -> None:
         processing_class=tok,
         peft_config=lora,
     )
-    trainer.train()
+    trainer.train(resume_from_checkpoint=True if a.resume else None)
     trainer.save_model(str(out_dir / "adapter"))
     print(f"adaptör kaydedildi: {out_dir / 'adapter'}")
 
