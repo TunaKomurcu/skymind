@@ -5,6 +5,7 @@ description = "Türkçe İHA operatör asistanı: komut -> doğrulanmış JSON g
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "httpx>=0.28.1",
     "pydantic>=2.7",
 ]
 
