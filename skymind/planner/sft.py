@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import random
 from pathlib import Path
 
 from skymind.planner.prompt import load_split, sft_example
@@ -41,8 +42,10 @@ def main() -> None:
     os.environ.setdefault("MLFLOW_TRACKING_URI", "sqlite:///outputs/mlflow.db")
     os.environ.setdefault("MLFLOW_EXPERIMENT_NAME", "planner-sft")
 
-    train_rows = load_split(a.train, a.subset or None)
-    val_rows = load_split(a.val, 300)
+    train_rows = load_split(a.train)
+    random.Random(0).shuffle(train_rows)  # alt küme kategori oranını korusun
+    train_rows = train_rows[: a.subset or None]
+    val_rows = load_split(a.val)[::7][:200]
     train_ds = Dataset.from_list([sft_example(r) for r in train_rows])
     val_ds = Dataset.from_list([sft_example(r) for r in val_rows])
 
@@ -93,9 +96,9 @@ def main() -> None:
         max_length=a.max_length,
         logging_steps=10,
         eval_strategy="steps",
-        eval_steps=200,
+        eval_steps=150,
         save_strategy="steps",
-        save_steps=200,
+        save_steps=150,
         save_total_limit=2,
         report_to=["mlflow"],
         seed=0,
