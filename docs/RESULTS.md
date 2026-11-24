@@ -60,3 +60,47 @@ uv run --extra train python -m skymind.planner.evaluate --name dpo-v2 \
 
 8 GB GPU'da DPO için `--batch 2` belleğe sığmadı (paylaşımlı belleğe taşma, adım başına dakikalar);
 `--batch 1 --accum 16 --max-length 384` kullanıldı.
+
+---
+
+# Nicemleme (Faz 6a) — GGUF / llama.cpp
+
+SFT modeli birleştirilip GGUF'a çevrildi (llama.cpp b12655), `llama-server` ile CUDA'da (RTX 4060 Laptop,
+tüm katmanlar GPU'da) aynı 400 örnekte ölçüldü. İstekler ardışık, batch=1, greedy, kısa sistem istemi.
+Gecikme = uçtan uca HTTP isteği (ortalama ~40 üretilen token).
+
+| Varyant | Boyut | json_valid | type_acc | field_acc | uydurma ↓ | gereksiz soru ↓ | p50 | p95 | tok/s |
+|---|---|---|---|---|---|---|---|---|---|
+| HF bf16 (referans) | ~2950 MB | 0.988 | 0.920 | 0.842 | 0.016 | 0.108 | — | — | — |
+| GGUF F16 | 2950 MB | 0.988 | 0.922 | 0.842 | 0.011 | 0.108 | 0.50 s | 1.13 s | 67 |
+| Q8_0 | 1570 MB | 0.988 | 0.920 | **0.846** | 0.016 | 0.108 | 0.29 s | 0.65 s | 113 |
+| **Q5_K_M** | 1073 MB | 0.978 | 0.912 | 0.843 | 0.011 | 0.108 | 0.26 s | 0.53 s | 136 |
+| Q4_K_M | 940 MB | 0.988 | 0.870 | 0.758 | 0.011 | 0.203 | 0.21 s | 0.47 s | 152 |
+| Q3_K_M | 786 MB | 0.970 | 0.552 | 0.180 | 0.005 | 0.759 | 0.24 s | 0.36 s | 138 |
+
+## Okuma ve uyarılar
+
+1. **Q8_0 ve Q5_K_M doğruluğu koruyor** (alan doğruluğu 0.842 → 0.846 / 0.843; fark gürültü içinde),
+   boyut %47 / %64 küçülüyor, gecikme p50 ~%48 / ~%48 düşüyor. **Dağıtım adayı: Q5_K_M.**
+2. **Q4_K_M'de bozulma başlıyor:** alan doğruluğu 0.842 → 0.758, gereksiz soru 0.108 → 0.203. Model
+   emin olmadığında netleştirme sorusuna kayıyor. Boyut kazancı (Q5'e göre 133 MB) buna değmiyor.
+3. **Q3_K_M çöküyor:** alan doğruluğu 0.18, komutların %76'sında gereksiz soru. **Düşük uydurma oranı
+   (0.005) burada başarı değil**, model neredeyse her şeye soru soruyor. Uydurma oranı tek başına
+   okunmamalı; gereksiz soru oranıyla birlikte değerlendirilmeli.
+4. **Gecikme azalması doğrusal değil:** Q4'ten Q3'e hız artmadı (138 vs 152 tok/s). Bu boyutta darboğaz
+   bellek bant genişliği değil; çekirdek başlatma ve HTTP/ayrıştırma ek yükü. Q3 yanıtları kısa
+   (gereksiz soru) olduğu için tok/s karşılaştırması da sapmalı.
+5. **Gürültü:** n=400, tek çalıştırma, tek GPU. Gecikme p95'i arka plan yüküne duyarlı; ölçüm sırasında
+   oyun/Godot kapalıydı. Q8/Q5/F16 arasındaki doğruluk farkları (±0.005 ≈ 1–2 örnek) anlamlı değil.
+6. **GPU yükü uyarısı:** aynı model başka bir GPU yükü (oyun) varken 25 tok/s verdi, boşken 164 tok/s
+   (`llama-bench`). Gecikme sayıları yalnızca boş GPU'da karşılaştırılabilir.
+7. **HF bf16 ile GGUF F16 farkı** (uydurma 0.016 vs 0.011, 1 örnek) farklı çekirdek/yuvarlama kaynaklı.
+
+## Tekrar üretme
+
+```bash
+uv run --extra train python -m skymind.optimize.merge --adapter outputs/sft-v1/adapter --out outputs/merged-sft
+# GGUF dönüşümü: llama.cpp convert_hf_to_gguf.py (sentencepiece gerekir) + llama-quantize
+uv run python -m skymind.optimize.eval_gguf --gguf outputs/gguf/skymind-sft-Q5_K_M.gguf \
+    --server third_party/llama-cuda/llama-server.exe --name gguf-Q5_K_M --limit 400
+```

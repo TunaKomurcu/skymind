@@ -30,3 +30,9 @@ Kısıtlar: **ücretsiz** araçlar, RTX 4060 Laptop (8 GB VRAM), 32 GB RAM, yaln
 - [x] DPO v2 (+SFT kaybı): yapıyı korudu, SFT'yi net geçmedi
 - [x] Sonuç tablosu ve uyarılar: `docs/RESULTS.md`
 - [ ] Çoklu tohum / güven aralığı (isteğe bağlı)
+
+## Sprint 3 (Faz 6)
+- [x] Adaptör birleştirme, GGUF dönüşümü, F16/Q8/Q5/Q4/Q3 nicemleme, doğruluk-boyut-gecikme tablosu
+- [ ] ONNX dışa aktarma + ONNX Runtime ölçümü
+- [ ] Distillation (1.5B -> 0.5B)
+- [ ] Pruning deneyi

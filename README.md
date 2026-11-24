@@ -4,7 +4,7 @@ Operatörün Türkçe komutunu doğrulanmış bir **JSON görev planına** çevi
 yerine **netleştirme sorusu** soran bir NLP/LLM araştırma prototipi. Yalnızca açık kaynak ve sentetik veri
 kullanır; gerçek operasyonel sistem iddiası yoktur.
 
-> Durum: Faz 0–4 tamam (veri, SFT, DPO). Plan ve ilerleme: [`docs/ROADMAP.md`](docs/ROADMAP.md).
+> Durum: Faz 0–4 tamam (veri, SFT, DPO), Faz 6 nicemleme tamam. Plan ve ilerleme: [`docs/ROADMAP.md`](docs/ROADMAP.md).
 > Kararlar: [`docs/adr/`](docs/adr/). Tüm sonuçlar ve uyarılar: [`docs/RESULTS.md`](docs/RESULTS.md).
 
 ## Planlayıcı sonuçları (400 test örneği)
@@ -36,3 +36,15 @@ docs/       yol haritası, ADR'ler
 ```
 
 Mimari diyagram, sonuç tabloları ve tekrar üretme adımları fazlar ilerledikçe buraya eklenecek.
+
+## Nicemleme (SFT modeli, llama.cpp, RTX 4060)
+
+| Varyant | Boyut | Alan doğruluğu | p50 gecikme |
+|---|---|---|---|
+| F16 | 2950 MB | 0.842 | 0.50 s |
+| **Q5_K_M** | 1073 MB | 0.843 | 0.26 s |
+| Q4_K_M | 940 MB | 0.758 | 0.21 s |
+| Q3_K_M | 786 MB | 0.180 | 0.24 s |
+
+Q5_K_M doğruluğu koruyup boyutu %64 küçültüyor; Q4'ten itibaren model gereksiz soruya kayıyor.
+Ayrıntı ve uyarılar: [`docs/RESULTS.md`](docs/RESULTS.md).
