@@ -22,3 +22,11 @@ Kısıtlar: **ücretsiz** araçlar, RTX 4060 Laptop (8 GB VRAM), 32 GB RAM, yaln
 - [x] Sentetik veri hattı (şablon + paraphrase + doğrulama + sızıntısız split)
 - [~] Altın test seti: 300 aday üretildi (data/gold), elle gözden geçirme bekliyor
 - [x] ADR-001 (model ve araç seçimleri)
+
+## Sprint 2 (Faz 3–4)
+- [x] Zero-shot ve trivial baseline'lar
+- [x] SFT (QLoRA, Qwen2.5-1.5B): geçerli JSON 0.99, alan doğruluğu 0.84
+- [x] DPO v1 (saf): şemayı bozdu, bulgu olarak belgelendi
+- [x] DPO v2 (+SFT kaybı): yapıyı korudu, SFT'yi net geçmedi
+- [x] Sonuç tablosu ve uyarılar: `docs/RESULTS.md`
+- [ ] Çoklu tohum / güven aralığı (isteğe bağlı)

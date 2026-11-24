@@ -14,7 +14,12 @@ from skymind.planner.prompt import SYSTEM_PROMPT, messages
 DEFAULT_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
 
 
-def load(model_name: str = DEFAULT_MODEL, adapter: str | None = None) -> tuple[Any, Any]:
+def load(
+    model_name: str = DEFAULT_MODEL,
+    adapter: str | None = None,
+    base_adapter: str | None = None,
+) -> tuple[Any, Any]:
+    """``base_adapter`` önce birleştirilir (DPO için SFT), ``adapter`` onun üstüne."""
     tok = AutoTokenizer.from_pretrained(model_name, padding_side="left")
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
@@ -24,8 +29,8 @@ def load(model_name: str = DEFAULT_MODEL, adapter: str | None = None) -> tuple[A
     if adapter:
         from peft import PeftModel
 
-        model = PeftModel.from_pretrained(model, adapter)
-        model = model.merge_and_unload()
+        for path in [p for p in (base_adapter, adapter) if p]:
+            model = PeftModel.from_pretrained(model, path).merge_and_unload()
     model.eval()
     return tok, model
 

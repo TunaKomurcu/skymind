@@ -4,8 +4,21 @@ Operatörün Türkçe komutunu doğrulanmış bir **JSON görev planına** çevi
 yerine **netleştirme sorusu** soran bir NLP/LLM araştırma prototipi. Yalnızca açık kaynak ve sentetik veri
 kullanır; gerçek operasyonel sistem iddiası yoktur.
 
-> Durum: Faz 0 (iskele). Plan ve ilerleme: [`docs/ROADMAP.md`](docs/ROADMAP.md).
-> Kararlar: [`docs/adr/`](docs/adr/).
+> Durum: Faz 0–4 tamam (veri, SFT, DPO). Plan ve ilerleme: [`docs/ROADMAP.md`](docs/ROADMAP.md).
+> Kararlar: [`docs/adr/`](docs/adr/). Tüm sonuçlar ve uyarılar: [`docs/RESULTS.md`](docs/RESULTS.md).
+
+## Planlayıcı sonuçları (400 test örneği)
+
+| | Zero-shot | SFT (QLoRA) | DPO v2 |
+|---|---|---|---|
+| Geçerli JSON | 0.367 | **0.988** | 0.953 |
+| Alan doğruluğu | 0.014 | 0.842 | **0.848** |
+| Uydurma oranı ↓ | 0.043 | 0.016 | **0.011** |
+| Gereksiz soru ↓ | 0.236 | 0.108 | **0.057** |
+
+SFT dağıtım adayı. Saf DPO şemayı bozdu, SFT kaybı eklenen v2 yapıyı korudu ama geçerlilikte SFT'nin
+gerisinde kaldı. Test seti sentetik/dağılım içi, fark küçük örneklemde: ayrıntı ve uyarılar
+[`docs/RESULTS.md`](docs/RESULTS.md)'de.
 
 ## Hızlı başlangıç
 

@@ -34,6 +34,12 @@ def main() -> None:
     ap.add_argument("--batch", type=int, default=2)
     ap.add_argument("--accum", type=int, default=8)
     ap.add_argument("--max-length", type=int, default=512)
+    ap.add_argument(
+        "--sft-weight",
+        type=float,
+        default=0.0,
+        help="DPO kaybına eklenen SFT (chosen NLL) ağırlığı; 0 = saf DPO",
+    )
     ap.add_argument("--resume", action="store_true", help="son checkpoint'ten devam et")
     a = ap.parse_args()
 
@@ -84,6 +90,11 @@ def main() -> None:
         lr_scheduler_type="cosine",
         warmup_steps=10,
         beta=a.beta,
+        **(
+            {"loss_type": ["sigmoid", "sft"], "loss_weights": [1.0, a.sft_weight]}
+            if a.sft_weight > 0
+            else {}
+        ),
         bf16=True,
         gradient_checkpointing=True,
         max_length=a.max_length,

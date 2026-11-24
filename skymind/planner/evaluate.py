@@ -22,6 +22,7 @@ def main() -> None:
     ap.add_argument("--name", required=True)
     ap.add_argument("--model", default=DEFAULT_MODEL)
     ap.add_argument("--adapter", default=None)
+    ap.add_argument("--base-adapter", default=None, help="önce birleştirilecek adaptör (DPO: SFT)")
     ap.add_argument("--data", type=Path, default=Path("data/processed/test.jsonl"))
     ap.add_argument("--limit", type=int, default=300, help="0 = tümü")
     ap.add_argument("--batch-size", type=int, default=16)
@@ -37,7 +38,7 @@ def main() -> None:
         rows = rows[::step][: a.limit]
     which = a.prompt or ("short" if a.adapter else "long")
     system = SYSTEM_SHORT if which == "short" else SYSTEM_PROMPT
-    tok, model = load(a.model, a.adapter)
+    tok, model = load(a.model, a.adapter, a.base_adapter)
 
     t0 = time.time()
     preds = generate(
@@ -62,7 +63,13 @@ def main() -> None:
     log_run(
         a.experiment,
         a.name,
-        params={"model": a.model, "adapter": a.adapter, "n": len(rows), "prompt": which},
+        params={
+            "model": a.model,
+            "adapter": a.adapter,
+            "base_adapter": a.base_adapter,
+            "n": len(rows),
+            "prompt": which,
+        },
         metrics=metrics,
         artifacts=[out],
     )
