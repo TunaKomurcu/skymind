@@ -81,20 +81,20 @@ Gecikme = uçtan uca HTTP isteği (ortalama ~40 üretilen token).
 ## Okuma ve uyarılar
 
 1. **Q8_0 ve Q5_K_M doğruluğu koruyor** (alan doğruluğu 0.842 → 0.846 / 0.843; fark gürültü içinde),
-   boyut %47 / %64 küçülüyor, gecikme p50 ~%48 / ~%48 düşüyor. **Dağıtım adayı: Q5_K_M.**
+   boyut %47 / %64 küçülüyor, gecikme p50 ~%42 / ~%48 düşüyor. **Dağıtım adayı: Q5_K_M.**
 2. **Q4_K_M'de bozulma başlıyor:** alan doğruluğu 0.842 → 0.758, gereksiz soru 0.108 → 0.203. Model
    emin olmadığında netleştirme sorusuna kayıyor. Boyut kazancı (Q5'e göre 133 MB) buna değmiyor.
 3. **Q3_K_M çöküyor:** alan doğruluğu 0.18, komutların %76'sında gereksiz soru. **Düşük uydurma oranı
    (0.005) burada başarı değil**, model neredeyse her şeye soru soruyor. Uydurma oranı tek başına
    okunmamalı; gereksiz soru oranıyla birlikte değerlendirilmeli.
-4. **Gecikme azalması doğrusal değil:** Q4'ten Q3'e hız artmadı (138 vs 152 tok/s). Bu boyutta darboğaz
-   bellek bant genişliği değil; çekirdek başlatma ve HTTP/ayrıştırma ek yükü. Q3 yanıtları kısa
-   (gereksiz soru) olduğu için tok/s karşılaştırması da sapmalı.
+4. **Gecikme azalması doğrusal değil:** Q4'ten Q3'e hız artmadı (138 vs 152 tok/s). Nedeni ölçülmedi; olası
+   açıklamalar sabit istek başı ek yükü (HTTP, ayrıştırma) ve Q3'ün kısa yanıtları (gereksiz soru):
+   kısa yanıtlarda tok/s karşılaştırması sapmalı.
 5. **Gürültü:** n=400, tek çalıştırma, tek GPU. Gecikme p95'i arka plan yüküne duyarlı; ölçüm sırasında
    oyun/Godot kapalıydı. Q8/Q5/F16 arasındaki doğruluk farkları (±0.005 ≈ 1–2 örnek) anlamlı değil.
 6. **GPU yükü uyarısı:** aynı model başka bir GPU yükü (oyun) varken 25 tok/s verdi, boşken 164 tok/s
    (`llama-bench`). Gecikme sayıları yalnızca boş GPU'da karşılaştırılabilir.
-7. **HF bf16 ile GGUF F16 farkı** (uydurma 0.016 vs 0.011, 1 örnek) farklı çekirdek/yuvarlama kaynaklı.
+7. **HF bf16 ile GGUF F16 farkı** (uydurma 0.016 vs 0.011, 1 örnek) nedeni araştırılmadı (olasılıkla farklı çekirdekler/yuvarlama).
 
 ## Tekrar üretme
 
