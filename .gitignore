@@ -25,3 +25,6 @@ checkpoints/
 data/raw/
 data/cache/
 data/processed/
+
+# yerel üçüncü taraf binary/kaynaklar
+third_party/
