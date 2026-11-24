@@ -48,3 +48,6 @@ Mimari diyagram, sonuç tabloları ve tekrar üretme adımları fazlar ilerledik
 
 Q5_K_M doğruluğu koruyup boyutu %64 küçültüyor; Q4'ten itibaren model gereksiz soruya kayıyor.
 Ayrıntı ve uyarılar: [`docs/RESULTS.md`](docs/RESULTS.md).
+
+CPU'da ONNX Runtime int4 (937 MB, 25 tok/s, alan doğruluğu 0.854) ile llama.cpp Q4_K_M (940 MB, 31 tok/s, 0.703)
+karşılaştırıldı; ONNX int4 gereksiz soruyu azaltıyor ama daha sık uyduruyor (0.037). Ayrıntı: `docs/RESULTS.md`.

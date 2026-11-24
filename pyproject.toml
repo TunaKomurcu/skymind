@@ -27,6 +27,14 @@ train = [
     "accelerate>=1.0",
     "bitsandbytes>=0.45",
 ]
+optimize = [
+    "onnxruntime-genai>=0.20",
+    "onnxruntime>=1.32",
+    "onnx>=1.23",
+    "onnx-ir",
+    "onnxscript",
+    "sentencepiece",
+]
 
 [tool.uv.sources]
 torch = [{ index = "pytorch-cu128" }]
@@ -63,3 +71,7 @@ plugins = ["pydantic.mypy"]
 # eğitim betikleri ince yapıştırıcı koddur; trl/transformers tipleri eksik
 module = ["skymind.planner.sft", "skymind.planner.dpo"]
 ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = ["onnxruntime_genai", "onnxruntime_genai.*"]
+ignore_missing_imports = true

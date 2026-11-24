@@ -104,3 +104,44 @@ uv run --extra train python -m skymind.optimize.merge --adapter outputs/sft-v1/a
 uv run python -m skymind.optimize.eval_gguf --gguf outputs/gguf/skymind-sft-Q5_K_M.gguf \
     --server third_party/llama-cuda/llama-server.exe --name gguf-Q5_K_M --limit 400
 ```
+
+---
+
+# ONNX Runtime (Faz 6b) — CPU
+
+Aynı birleştirilmiş SFT modeli `onnxruntime-genai` model oluşturucusuyla ONNX'e çevrildi (fp32 ve int4),
+aynı 400 örnekte, **CPU'da**, ardışık istek, greedy ölçüldü. Adil karşılaştırma için llama.cpp Q4_K_M de
+CPU'da (`-ngl 0`) ölçüldü. GPU kullanılmadı.
+
+| Çalışma zamanı / format | Boyut | json_valid | type_acc | field_acc | uydurma ↓ | gereksiz soru ↓ | p50 | p95 | tok/s |
+|---|---|---|---|---|---|---|---|---|---|
+| ONNX fp32 | 5905 MB | 0.985 | 0.920 | 0.840 | 0.011 | 0.108 | 3.84 s | 8.31 s | 8.7 |
+| ONNX int4 | 937 MB | 0.973 | 0.907 | **0.854** | 0.037 | 0.014 | 1.28 s | 2.50 s | 25.3 |
+| llama.cpp Q4_K_M (CPU) | 940 MB | 0.973 | 0.828 | 0.703 | 0.011 | 0.255 | 1.08 s | 2.22 s | 30.6 |
+| *llama.cpp Q4_K_M (GPU, önceki tablo)* | 940 MB | 0.988 | 0.870 | 0.758 | 0.011 | 0.203 | 0.21 s | 0.47 s | 152 |
+
+## Okuma ve uyarılar
+
+1. **ONNX fp32, doğruluk açısından HF/GGUF F16 ile aynı** (alan 0.840 vs 0.842): dönüşüm modeli bozmadı.
+   Ama CPU'da 3.8 s/istek ve 5.9 GB. Dağıtım için uygun değil.
+2. **ONNX int4 ve llama.cpp Q4_K_M aynı boyutta (~940 MB) ama farklı hata profili.** ONNX int4 gereksiz
+   soruyu neredeyse hiç sormuyor (0.014) ve alan doğruluğu en yüksek (0.854), ama uydurma oranı 0.037
+   (188 örnekten ~7), yani eksik komutta daha sık plan üretiyor. llama.cpp Q4_K_M ise tersine temkinli:
+   uydurma 0.011 ama gereksiz soru 0.255. Operatör asistanında uydurma, gereksiz sorudan daha maliyetli
+   olduğu için **bu iki Q4 varyantından hiçbiri koşulsuz üstün değil**; Q5_K_M (GPU/CPU) hâlâ en dengeli.
+3. **Aynı GGUF dosyası farklı backend'de farklı sonuç verdi** (Q4_K_M alan doğruluğu GPU 0.758, CPU 0.703).
+   Greedy üretim sayısal olarak backend'e bağlı; nicemlenmiş modelde küçük logit farkları karar
+   sınırındaki örnekleri çeviriyor. Tek tek varyant farklarını (~±0.05) tek çalıştırmayla kesin yorumlamayın.
+4. **Hız:** CPU'da llama.cpp Q4_K_M (30.6 tok/s) ONNX int4'ten (25.3 tok/s) ~%21 hızlı. Bu fark tek
+   çalıştırma ve 24 iş parçacığı varsayılanıyla ölçüldü, iş parçacığı sayısı ayarlanmadı. GPU, CPU'dan
+   ~5× hızlı (152 vs 30.6 tok/s). Bunun nedeni ölçülmedi; bellek bant genişliği olası bir açıklama.
+5. **Ölçüm koşulları:** ölçüm sırasında PC'de başka uygulamalar açık olabilirdi (CPU ölçümü GPU'dan
+   daha hassas). p95 değerleri özellikle gürültülü.
+
+## Tekrar üretme
+
+```bash
+uv run --extra train --extra optimize python -m onnxruntime_genai.models.builder \
+    -m outputs/merged-sft -o outputs/onnx/int4-cpu -p int4 -e cpu
+uv run --extra optimize python -m skymind.optimize.eval_onnx --model-dir outputs/onnx/int4-cpu --name onnx-int4-cpu
+```

@@ -33,6 +33,6 @@ Kısıtlar: **ücretsiz** araçlar, RTX 4060 Laptop (8 GB VRAM), 32 GB RAM, yaln
 
 ## Sprint 3 (Faz 6)
 - [x] Adaptör birleştirme, GGUF dönüşümü, F16/Q8/Q5/Q4/Q3 nicemleme, doğruluk-boyut-gecikme tablosu
-- [ ] ONNX dışa aktarma + ONNX Runtime ölçümü
+- [x] ONNX dışa aktarma (fp32/int4) + ONNX Runtime CPU ölçümü
 - [ ] Distillation (1.5B -> 0.5B)
 - [ ] Pruning deneyi
