@@ -36,3 +36,11 @@ Kısıtlar: **ücretsiz** araçlar, RTX 4060 Laptop (8 GB VRAM), 32 GB RAM, yaln
 - [x] ONNX dışa aktarma (fp32/int4) + ONNX Runtime CPU ölçümü
 - [ ] Distillation (1.5B -> 0.5B)
 - [ ] Pruning deneyi
+
+## Sprint 4 (Faz 7)
+- [x] C++ servis: llama.cpp motoru, HTTP uçları, sunucu tarafı şema doğrulaması, Prometheus metrikleri
+- [x] GoogleTest (15 test), Pydantic ile eşlik testi (263 vaka); doğrulayıcıya mutasyon testi yapıldı
+- [ ] Python baseline servisi + yük testi (p50/p95/p99, eşzamanlılık), C++ ile karşılaştırma
+- [ ] ONNX Runtime motoru (aynı `InferenceEngine` arayüzü)
+- [ ] Prometheus + Grafana, A/B yönlendirme
+- [ ] Podman imajı + K8s manifestleri (Podman henüz kurulu değil)
