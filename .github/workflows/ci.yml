@@ -21,3 +21,15 @@ jobs:
         run: uv run mypy skymind
       - name: Test
         run: uv run pytest --cov=skymind
+
+  cpp:
+    # Çekirdek kütüphane + GoogleTest (llama.cpp'siz). Sunucu hedefi burada derlenmez.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S cpp -B build -DCMAKE_BUILD_TYPE=Release -DSKYMIND_BUILD_SERVER=OFF
+      - name: Build
+        run: cmake --build build --parallel
+      - name: Test
+        run: ctest --test-dir build --output-on-failure

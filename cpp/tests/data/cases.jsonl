@@ -1,0 +1,263 @@
+{"doc": {"type": "refusal", "reason": "Silah kullanımı bu asistanın kapsamı dışındadır."}, "valid": true}
+{"doc": {"type": "clarification", "question": "Yarıçap nedir?", "missing": ["radius_m"]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 300.0}, {"action": "patrol", "waypoints": [{"kind": "named", "name": "Charlie noktası"}, {"kind": "named", "name": "pist"}, {"kind": "named", "name": "sınır karakolu"}], "altitude_m": 300.0, "loops": 3}, {"action": "return_to_launch"}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "set_speed", "speed_ms": 5.0}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "loiter", "center": {"kind": "named", "name": "orman sahası"}, "altitude_m": 100.0, "duration_s": 300}]}, "valid": true}
+{"doc": {"type": "refusal", "reason": "İrtifa sınırı aşılıyor (izin verilen en fazla 5000 m)."}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "land", "at": {"kind": "named", "name": "sınır karakolu"}}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 2000.0}, {"action": "loiter", "center": {"kind": "relative", "direction": "NW"}, "altitude_m": 200.0}, {"action": "land"}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 1500.0}]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Hız (m/s) bilgisini eksik aldım, netleştirir misiniz?", "missing": ["speed_ms"]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "scan", "center": {"kind": "named", "name": "orman sahası"}, "radius_m": 500.0, "altitude_m": 200.0}]}, "valid": true}
+{"doc": {"type": "refusal", "reason": "Güvenli olmayan ya da yasak bir uçuş talebi."}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "patrol", "waypoints": [{"kind": "named", "name": "Bravo noktası"}, {"kind": "named", "name": "köprü"}, {"kind": "named", "name": "Alfa noktası"}], "altitude_m": 1000.0, "loops": 1}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 200.0}, {"action": "goto", "target": {"kind": "named", "name": "radar tepesi"}}, {"action": "land"}]}, "valid": true}
+{"doc": {"type": "refusal", "reason": "Bu istek İHA görev planlama kapsamı dışındadır."}, "valid": true}
+{"doc": {"type": "clarification", "question": "Lütfen hız (m/s) bilgisini belirtir misiniz?", "missing": ["speed_ms"]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 2000.0}, {"action": "patrol", "waypoints": [{"kind": "named", "name": "depo"}, {"kind": "named", "name": "köprü"}], "altitude_m": 500.0, "loops": 1}, {"action": "land"}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "goto", "target": {"kind": "relative", "direction": "NE"}}]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Komutu uygulayabilmem için yarıçap gerekli. Verir misiniz?", "missing": ["radius_m"]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 3000.0}, {"action": "patrol", "waypoints": [{"kind": "named", "name": "Alfa noktası"}, {"kind": "named", "name": "sınır karakolu"}, {"kind": "named", "name": "radar tepesi"}], "altitude_m": 750.0, "loops": 3}, {"action": "land", "at": {"kind": "named", "name": "liman"}}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "scan", "center": {"kind": "named", "name": "radar tepesi"}, "radius_m": 1000.0, "altitude_m": 500.0}]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Hedef bölge nedir?", "missing": ["center"]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Komutu uygulayabilmem için irtifa gerekli. Verir misiniz?", "missing": ["altitude_m"]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Komutu uygulayabilmem için hedef nokta gerekli. Verir misiniz?", "missing": ["target"]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 500.0}, {"action": "loiter", "center": {"kind": "coords", "lat": 41.71, "lon": 41.74}, "altitude_m": 150.0, "duration_s": 1800}, {"action": "return_to_launch"}]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Devriye noktaları bilgisini eksik aldım, netleştirir misiniz?", "missing": ["waypoints"]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 3000.0}, {"action": "goto", "target": {"kind": "relative", "direction": "S"}, "altitude_m": 500.0}, {"action": "return_to_launch"}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 3000.0}, {"action": "patrol", "waypoints": [{"kind": "named", "name": "Alfa noktası"}, {"kind": "named", "name": "Bravo noktası"}], "altitude_m": 500.0, "loops": 4}, {"action": "return_to_launch"}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 300.0}, {"action": "goto", "target": {"kind": "named", "name": "köprü"}, "altitude_m": 3000.0}, {"action": "land"}]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Hız (m/s) nedir?", "missing": ["speed_ms"]}, "valid": true}
+{"doc": {"type": "clarification", "question": "İrtifa bilgisini eksik aldım, netleştirir misiniz?", "missing": ["altitude_m"]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 2000.0}, {"action": "patrol", "waypoints": [{"kind": "named", "name": "radar tepesi"}, {"kind": "named", "name": "depo"}], "altitude_m": 750.0, "loops": 3}, {"action": "land"}]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Lütfen irtifa bilgisini belirtir misiniz?", "missing": ["altitude_m"]}, "valid": true}
+{"doc": {"type": "refusal", "reason": "Yarıçap sınırı aşılıyor (izin verilen en fazla 50000 m)."}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 150.0}, {"action": "loiter", "center": {"kind": "relative", "direction": "NW", "distance_m": 3000.0}, "altitude_m": 500.0, "radius_m": 100.0}, {"action": "return_to_launch"}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "goto", "target": {"kind": "relative", "direction": "SW", "distance_m": 1000.0}}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "goto", "target": {"kind": "coords", "lat": 40.62, "lon": 31.62}}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "scan", "center": {"kind": "coords", "lat": 41.07, "lon": 28.96}, "radius_m": 500.0, "altitude_m": 2000.0}]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Komutu uygulayabilmem için hedef bölge gerekli. Verir misiniz?", "missing": ["center"]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Lütfen hedef nokta bilgisini belirtir misiniz?", "missing": ["target"]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Hedef nokta bilgisini eksik aldım, netleştirir misiniz?", "missing": ["target"]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Hedef nokta nedir?", "missing": ["target"]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "patrol", "waypoints": [{"kind": "named", "name": "Charlie noktası"}, {"kind": "named", "name": "sınır karakolu"}, {"kind": "named", "name": "orman sahası"}], "altitude_m": 300.0, "loops": 4}]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Komutu uygulayabilmem için irtifa ve yarıçap gerekli. Verir misiniz?", "missing": ["altitude_m", "radius_m"]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 200.0}, {"action": "goto", "target": {"kind": "named", "name": "Charlie noktası"}, "altitude_m": 300.0}, {"action": "land"}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "patrol", "waypoints": [{"kind": "named", "name": "liman"}, {"kind": "named", "name": "radar tepesi"}, {"kind": "named", "name": "pist"}], "altitude_m": 300.0, "loops": 2}]}, "valid": true}
+{"doc": {"type": "clarification", "question": "İrtifa ve yarıçap bilgisini eksik aldım, netleştirir misiniz?", "missing": ["altitude_m", "radius_m"]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "patrol", "waypoints": [{"kind": "named", "name": "liman"}, {"kind": "named", "name": "orman sahası"}], "altitude_m": 750.0, "loops": 1}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "loiter", "center": {"kind": "relative", "direction": "W"}, "altitude_m": 300.0, "duration_s": 600}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "patrol", "waypoints": [{"kind": "named", "name": "orman sahası"}, {"kind": "named", "name": "Charlie noktası"}], "altitude_m": 750.0, "loops": 2}]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Devriye noktaları nedir?", "missing": ["waypoints"]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "scan", "center": {"kind": "relative", "direction": "E"}, "radius_m": 100.0, "altitude_m": 3000.0}]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Yarıçap bilgisini eksik aldım, netleştirir misiniz?", "missing": ["radius_m"]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "loiter", "center": {"kind": "relative", "direction": "SE"}, "altitude_m": 3000.0, "duration_s": 600}]}, "valid": true}
+{"doc": {"type": "refusal", "reason": "Hız sınırı aşılıyor (izin verilen en fazla 100 m/s)."}, "valid": true}
+{"doc": {"type": "clarification", "question": "Lütfen hedef bölge bilgisini belirtir misiniz?", "missing": ["center"]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 500.0}, {"action": "patrol", "waypoints": [{"kind": "named", "name": "sınır karakolu"}, {"kind": "named", "name": "baraj"}, {"kind": "named", "name": "Charlie noktası"}], "altitude_m": 750.0, "loops": 4}, {"action": "land", "at": {"kind": "named", "name": "Charlie noktası"}}]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Komutu uygulayabilmem için hız (m/s) gerekli. Verir misiniz?", "missing": ["speed_ms"]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 1500.0}, {"action": "set_speed", "speed_ms": 20.0}, {"action": "scan", "center": {"kind": "named", "name": "baraj"}, "radius_m": 1000.0, "altitude_m": 1000.0}, {"action": "return_to_launch"}]}, "valid": true}
+{"doc": {"type": "clarification", "question": "İrtifa nedir?", "missing": ["altitude_m"]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "loiter", "center": {"kind": "coords", "lat": 37.89, "lon": 35.5}, "altitude_m": 2000.0, "duration_s": 1200}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 2000.0}, {"action": "set_speed", "speed_ms": 25.0}, {"action": "loiter", "center": {"kind": "named", "name": "baraj"}, "altitude_m": 3000.0}, {"action": "land", "at": {"kind": "named", "name": "depo"}}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "patrol", "waypoints": [{"kind": "named", "name": "Alfa noktası"}, {"kind": "named", "name": "Charlie noktası"}, {"kind": "named", "name": "Bravo noktası"}], "altitude_m": 3000.0, "loops": 3}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "scan", "center": {"kind": "named", "name": "depo"}, "radius_m": 3000.0, "altitude_m": 750.0}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 1000.0}, {"action": "loiter", "center": {"kind": "named", "name": "baraj"}, "altitude_m": 100.0, "radius_m": 300.0, "duration_s": 1200}, {"action": "return_to_launch"}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 100.0}, {"action": "patrol", "waypoints": [{"kind": "named", "name": "baraj"}, {"kind": "named", "name": "orman sahası"}], "altitude_m": 500.0, "loops": 1}, {"action": "land", "at": {"kind": "named", "name": "sınır karakolu"}}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 10.0}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 5000.0}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 5000.1}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 9.9}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 100}]}, "valid": true}
+{"doc": {"type": "plan", "steps": []}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}, {"action": "return_to_launch"}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "return_to_launch", "x": 1}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "land", "at": null}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "land"}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "fly"}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"altitude_m": 100}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "set_speed", "speed_ms": 5}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "set_speed", "speed_ms": 100.1}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "goto", "target": {"kind": "relative", "direction": "N", "distance_m": null}}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "goto", "target": {"kind": "relative", "direction": "N"}}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "goto", "target": {"kind": "relative", "direction": "N", "distance_m": 0}}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "goto", "target": {"kind": "relative", "direction": "UP"}}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "goto", "target": {"kind": "coords", "lat": 91, "lon": 0}}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "goto", "target": {"kind": "coords", "lat": 40.5, "lon": 32.1}}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "goto", "target": {"kind": "named", "name": ""}}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "goto", "target": {"kind": "named", "name": "çççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççç"}}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "goto", "target": {"kind": "named", "name": "ççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççççç"}}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "patrol", "waypoints": [{"kind": "named", "name": "a"}], "altitude_m": 100}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "patrol", "waypoints": [{"kind": "named", "name": "a"}, {"kind": "named", "name": "b"}], "altitude_m": 100, "loops": 3.0}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "patrol", "waypoints": [{"kind": "named", "name": "a"}, {"kind": "named", "name": "b"}], "altitude_m": 100, "loops": 21}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "loiter", "center": {"kind": "named", "name": "a"}, "altitude_m": 100, "duration_s": 10.5}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "loiter", "center": {"kind": "named", "name": "a"}, "altitude_m": 100, "duration_s": null}]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Hangi irtifa?", "missing": ["altitude_m"]}, "valid": true}
+{"doc": {"type": "clarification", "question": "ab", "missing": ["altitude_m"]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Hangi irtifa?", "missing": []}, "valid": false}
+{"doc": {"type": "clarification", "question": "Hangi irtifa?", "missing": ["  "]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Hangi irtifa?", "missing": ["a", "a", "a", "a", "a", "a"]}, "valid": false}
+{"doc": {"type": "clarification", "question": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "missing": ["a"]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Hangi irtifa?", "missing": ["a"], "extra": 1}, "valid": false}
+{"doc": {"type": "refusal", "reason": "Kapsam dışı"}, "valid": true}
+{"doc": {"type": "refusal", "reason": "no"}, "valid": false}
+{"doc": {"type": "refusal"}, "valid": false}
+{"doc": {"type": "unknown"}, "valid": false}
+{"doc": {}, "valid": false}
+{"doc": {"type": "refusal", "reason": "abc"}, "valid": true}
+{"doc": {"type": "refusal", "reason": "Silah kullanımı bu asistanın kapsamı dışındadır._x"}, "valid": true}
+{"doc": {"type": "refusal", "reason": {}}, "valid": false}
+{"doc": {"type": "clarification", "question": "Yarıçap nedir?_x", "missing": ["radius_m"]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "loiter", "center": {"kind": {}, "name": "orman sahası"}, "altitude_m": 100.0, "duration_s": 300}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "loiter_x", "center": {"kind": "named", "name": "orman sahası"}, "altitude_m": 100.0, "duration_s": 300}]}, "valid": false}
+{"doc": {"type": "refusal_x", "reason": "İrtifa sınırı aşılıyor (izin verilen en fazla 5000 m)."}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "land", "at": {"kind": "abc", "name": "sınır karakolu"}}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 2000.0}, {"action": "loiter", "center": {"kind": "relative", "direction": "NW"}, "altitude_m": 200.0}, {"action": "land", "bogus": 1}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff_x", "altitude_m": 2000.0}, {"action": "loiter", "center": {"kind": "relative", "direction": "NW"}, "altitude_m": 200.0}, {"action": "land"}]}, "valid": false}
+{"doc": {"type": "plan"}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "set_speed", "speed_ms": "abc"}]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Hız (m/s) bilgisini eksik aldım, netleştirir misiniz?_x", "missing": ["speed_ms"]}, "valid": true}
+{"doc": {"type": "plan_x", "steps": [{"action": "land", "at": {"kind": "named", "name": "sınır karakolu"}}]}, "valid": false}
+{"doc": {"reason": "Güvenli olmayan ya da yasak bir uçuş talebi."}, "valid": false}
+{"doc": {"type": "clarification_x", "question": "Hız (m/s) bilgisini eksik aldım, netleştirir misiniz?", "missing": ["speed_ms"]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Hız (m/s) bilgisini eksik aldım, netleştirir misiniz?", "missing": ["speed_ms_x"]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "patrol", "waypoints": [{"kind": "named"}, {"kind": "named", "name": "köprü"}, {"kind": "named", "name": "Alfa noktası"}], "altitude_m": 1000.0, "loops": 1}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "patrol", "waypoints": [{"kind": "named", "name": "Bravo noktası"}, {"kind": "named", "name": "köprü"}, {"kind": "named", "name": "Alfa noktası_x"}], "altitude_m": 1000.0, "loops": 1}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": null}, {"action": "goto", "target": {"kind": "named", "name": "radar tepesi"}}, {"action": "land"}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "set_speed_x", "speed_ms": 5.0}]}, "valid": false}
+{"doc": {"reason": "Silah kullanımı bu asistanın kapsamı dışındadır."}, "valid": false}
+{"doc": {"question": "Lütfen hız (m/s) bilgisini belirtir misiniz?", "missing": ["speed_ms"]}, "valid": false}
+{"doc": {"type": "abc", "steps": [{"action": "land", "at": {"kind": "named", "name": "sınır karakolu"}}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "land", "at": {"kind": "named", "name": "sınır karakolu"}, "bogus": 1}]}, "valid": false}
+{"doc": {"steps": [{"action": "takeoff", "altitude_m": 2000.0}, {"action": "patrol", "waypoints": [{"kind": "named", "name": "depo"}, {"kind": "named", "name": "köprü"}], "altitude_m": 500.0, "loops": 1}, {"action": "land"}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 2000.0}, {"action": "patrol", "waypoints": [{"kind": "named", "name": "depo"}, {"kind": "named", "name": "köprü"}], "altitude_m": 500.0, "loops": 1, "bogus": 1}, {"action": "land"}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"target": {"kind": "relative", "direction": "NE"}}]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Komutu uygulayabilmem için yarıçap gerekli. Verir misiniz?", "missing": ["radius_m_x"]}, "valid": true}
+{"doc": {"question": "Komutu uygulayabilmem için yarıçap gerekli. Verir misiniz?", "missing": ["radius_m"]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 3000.0}, {"action": "patrol", "waypoints": [{"kind": "named", "name": "Alfa noktası"}, {"kind": "named", "name": "sınır karakolu"}, {"kind": "named", "name": "radar tepesi"}], "altitude_m": 750.0, "loops": 3, "bogus": 1}, {"action": "land", "at": {"kind": "named", "name": "liman"}}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "scan", "center": {"kind": "named", "name": "radar tepesi"}, "radius_m": 1000.0, "altitude_m": "abc"}]}, "valid": false}
+{"doc": {"type": "refusal", "reason": []}, "valid": false}
+{"doc": {"reason": "Bu istek İHA görev planlama kapsamı dışındadır."}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 1500.0, "bogus": 1}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": []}]}, "valid": false}
+{"doc": {"type": null, "question": "Hedef bölge nedir?", "missing": ["center"]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Komutu uygulayabilmem için irtifa gerekli. Verir misiniz?_x", "missing": ["altitude_m"]}, "valid": true}
+{"doc": {"type": "abc", "question": "Komutu uygulayabilmem için irtifa gerekli. Verir misiniz?", "missing": ["altitude_m"]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "set_speed", "speed_ms": -5}]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Komutu uygulayabilmem için irtifa gerekli. Verir misiniz?", "missing": ["abc"]}, "valid": true}
+{"doc": {"type": "refusal_x", "reason": "Bu istek İHA görev planlama kapsamı dışındadır."}, "valid": false}
+{"doc": {"type": "clarification", "question": null, "missing": ["target"]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Komutu uygulayabilmem için hedef nokta gerekli. Verir misiniz?", "missing": ["target_x"]}, "valid": true}
+{"doc": {"type": "clarification", "question": null, "missing": ["waypoints"]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": "abc"}, {"action": "goto", "target": {"kind": "relative", "direction": "S"}, "altitude_m": 500.0}, {"action": "return_to_launch"}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 3000.0}, {"action": "goto", "target": {"kind": "relative", "direction": "S"}, "altitude_m": 500.0}, {"action": []}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 3000.0}, {"action": "patrol", "waypoints": [{"kind": "named", "name": "Alfa noktası"}, {"kind": {}, "name": "Bravo noktası"}], "altitude_m": 500.0, "loops": 4}, {"action": "return_to_launch"}]}, "valid": false}
+{"doc": {"steps": [{"action": "takeoff", "altitude_m": 3000.0}, {"action": "patrol", "waypoints": [{"kind": "named", "name": "Alfa noktası"}, {"kind": "named", "name": "Bravo noktası"}], "altitude_m": 500.0, "loops": 4}, {"action": "return_to_launch"}]}, "valid": false}
+{"doc": {"steps": [{"action": "set_speed", "speed_ms": 5.0}]}, "valid": false}
+{"doc": {"type": null, "steps": [{"action": "goto", "target": {"kind": "relative", "direction": "NE"}}]}, "valid": false}
+{"doc": {"steps": [{"action": "takeoff", "altitude_m": 1500.0}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 300.0}, {"action": "goto", "target": {"kind": "named", "name": "köprü"}, "altitude_m": null}, {"action": "land"}]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 300.0}, {"action": "goto", "target": {"kind": "named", "name": "köprü"}, "altitude_m": {}}, {"action": "land"}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "set_speed"}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "set_speed", "speed_ms": 0}]}, "valid": false}
+{"doc": {"type": "clarification", "missing": ["speed_ms"]}, "valid": false}
+{"doc": {"type": "clarification", "question": "İrtifa bilgisini eksik aldım, netleştirir misiniz?"}, "valid": false}
+{"doc": {"type": "refusal_x", "reason": "Güvenli olmayan ya da yasak bir uçuş talebi."}, "valid": false}
+{"doc": {"type": "refusal", "reason": "Güvenli olmayan ya da yasak bir uçuş talebi._x"}, "valid": true}
+{"doc": {"type": [], "steps": [{"action": "takeoff", "altitude_m": 1500.0}]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Lütfen hız (m/s) bilgisini belirtir misiniz?", "missing": [{}]}, "valid": false}
+{"doc": {"type": "abc", "question": "Hız (m/s) bilgisini eksik aldım, netleştirir misiniz?", "missing": ["speed_ms"]}, "valid": false}
+{"doc": {"type": {}, "question": "Hız (m/s) bilgisini eksik aldım, netleştirir misiniz?", "missing": ["speed_ms"]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Hız (m/s) bilgisini eksik aldım, netleştirir misiniz?", "missing": [[]]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Lütfen irtifa bilgisini belirtir misiniz?"}, "valid": false}
+{"doc": {"type": "clarification", "question": [], "missing": ["altitude_m"]}, "valid": false}
+{"doc": {"type": "refusal_x", "reason": "Yarıçap sınırı aşılıyor (izin verilen en fazla 50000 m)."}, "valid": false}
+{"doc": {"type": null, "reason": "Yarıçap sınırı aşılıyor (izin verilen en fazla 50000 m)."}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 150.0}, {"action": "loiter", "center": {"kind": "relative", "direction": null, "distance_m": 3000.0}, "altitude_m": 500.0, "radius_m": 100.0}, {"action": "return_to_launch"}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 150.0}, {"action": "loiter", "center": {"kind": "relative", "direction": "NW", "distance_m": 3000.0}, "altitude_m": 500.0, "radius_m": 100.0}, {"action": "return_to_launch_x"}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "goto", "target": {"kind": "relative", "direction": "SW", "distance_m": []}}]}, "valid": false}
+{"doc": {"type": "clarification", "question": {}, "missing": ["altitude_m"]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"center": {"kind": "coords", "lat": 41.07, "lon": 28.96}, "radius_m": 500.0, "altitude_m": 2000.0}]}, "valid": false}
+{"doc": {"type": {}, "steps": [{"action": "scan", "center": {"kind": "coords", "lat": 41.07, "lon": 28.96}, "radius_m": 500.0, "altitude_m": 2000.0}]}, "valid": false}
+{"doc": {"type": "clarification", "missing": ["altitude_m"]}, "valid": false}
+{"doc": {"type": "clarification", "question": "İrtifa bilgisini eksik aldım, netleştirir misiniz?", "missing": ["altitude_m_x"]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "goto", "target": {"kind": "relative", "direction": "NE", "bogus": 1}}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "goto", "target": {"kind": "relative_x", "direction": "NE"}}]}, "valid": false}
+{"doc": {"type": [], "question": "Komutu uygulayabilmem için hedef bölge gerekli. Verir misiniz?", "missing": ["center"]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Komutu uygulayabilmem için hedef bölge gerekli. Verir misiniz?", "missing": [null]}, "valid": false}
+{"doc": {"type": {}, "question": "Lütfen hedef nokta bilgisini belirtir misiniz?", "missing": ["target"]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Lütfen hedef nokta bilgisini belirtir misiniz?", "missing": ["abc"]}, "valid": true}
+{"doc": {"type": "clarification", "missing": ["target"]}, "valid": false}
+{"doc": {"type": null, "question": "Hedef nokta bilgisini eksik aldım, netleştirir misiniz?", "missing": ["target"]}, "valid": false}
+{"doc": {"type": "clarification", "question": "abc", "missing": ["target"]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Lütfen hız (m/s) bilgisini belirtir misiniz?", "missing": [null]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "patrol", "waypoints": [{"kind": "named", "name": "Charlie noktası"}, {"kind": "named", "name": "sınır karakolu"}, {"kind": "abc", "name": "orman sahası"}], "altitude_m": 300.0, "loops": 4}]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Komutu uygulayabilmem için irtifa ve yarıçap gerekli. Verir misiniz?", "missing": ["altitude_m_x", "radius_m"]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 200.0}, {"action": "goto", "target": {"kind": "named", "name": "Charlie noktası"}, "altitude_m": 300.0}, {}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 200.0}, {"action": "goto", "target": {"kind": "named", "name": "Charlie noktası"}, "altitude_m": 300.0}, {"action": "land", "bogus": 1}]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Hız (m/s) nedir?", "missing": [{}]}, "valid": false}
+{"doc": {"type": "clarification", "question": {}, "missing": ["speed_ms"]}, "valid": false}
+{"doc": {"type": {}, "question": "Hedef nokta bilgisini eksik aldım, netleştirir misiniz?", "missing": ["target"]}, "valid": false}
+{"doc": {"type": "clarification_x", "question": "Hedef nokta bilgisini eksik aldım, netleştirir misiniz?", "missing": ["target"]}, "valid": false}
+{"doc": {"type": "clarification", "missing": ["radius_m"]}, "valid": false}
+{"doc": {"type": "clarification_x", "question": "Komutu uygulayabilmem için yarıçap gerekli. Verir misiniz?", "missing": ["radius_m"]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "patrol", "waypoints": [{"kind": "named", "name": "liman"}, {"kind": "named", "name": "radar tepesi"}, {"kind": "named", "name": "pist"}], "altitude_m": 300.0, "loops": 2, "bogus": 1}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": [], "waypoints": [{"kind": "named", "name": "liman"}, {"kind": "named", "name": "radar tepesi"}, {"kind": "named", "name": "pist"}], "altitude_m": 300.0, "loops": 2}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "land", "at": {"kind": "named", "name": null}}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "set_speed", "speed_ms": 5.0, "bogus": 1}]}, "valid": false}
+{"doc": {"type": "plan_x", "steps": [{"action": "set_speed", "speed_ms": 5.0}]}, "valid": false}
+{"doc": {"type": "clarification", "missing": ["altitude_m", "radius_m"]}, "valid": false}
+{"doc": {"question": "İrtifa ve yarıçap bilgisini eksik aldım, netleştirir misiniz?", "missing": ["altitude_m", "radius_m"]}, "valid": false}
+{"doc": {"type": "clarification", "question": "abc", "missing": ["altitude_m", "radius_m"]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Komutu uygulayabilmem için irtifa ve yarıçap gerekli. Verir misiniz?"}, "valid": false}
+{"doc": {"steps": [{"action": "patrol", "waypoints": [{"kind": "named", "name": "liman"}, {"kind": "named", "name": "orman sahası"}], "altitude_m": 750.0, "loops": 1}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "loiter", "center": {"direction": "W"}, "altitude_m": 300.0, "duration_s": 600}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"speed_ms": 5.0}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"waypoints": [{"kind": "named", "name": "orman sahası"}, {"kind": "named", "name": "Charlie noktası"}], "altitude_m": 750.0, "loops": 2}]}, "valid": false}
+{"doc": {"question": "Komutu uygulayabilmem için irtifa gerekli. Verir misiniz?", "missing": ["altitude_m"]}, "valid": false}
+{"doc": {"type": {}, "reason": "Bu istek İHA görev planlama kapsamı dışındadır."}, "valid": false}
+{"doc": {"type": null, "reason": "Bu istek İHA görev planlama kapsamı dışındadır."}, "valid": false}
+{"doc": {"type": null, "reason": "İrtifa sınırı aşılıyor (izin verilen en fazla 5000 m)."}, "valid": false}
+{"doc": {"reason": "İrtifa sınırı aşılıyor (izin verilen en fazla 5000 m)."}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff"}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "land", "at": {"kind": [], "name": "sınır karakolu"}}]}, "valid": false}
+{"doc": {"type": "clarification", "question": "İrtifa bilgisini eksik aldım, netleştirir misiniz?", "missing": ["abc"]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Lütfen hedef nokta bilgisini belirtir misiniz?"}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "loiter", "center": {"kind": "relative", "direction": "SE"}, "altitude_m": 3000.0}]}, "valid": true}
+{"doc": {"type": null, "question": "İrtifa bilgisini eksik aldım, netleştirir misiniz?", "missing": ["altitude_m"]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Hız (m/s) bilgisini eksik aldım, netleştirir misiniz?", "missing": [null]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": [], "speed_ms": 5.0}]}, "valid": false}
+{"doc": {"type": "clarification", "question": "abc", "missing": ["center"]}, "valid": true}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 500.0}, {"action": "patrol", "waypoints": [{"kind": "named", "name": "sınır karakolu"}, {"kind": "named", "name": "baraj"}, {"kind": "named", "name": "Charlie noktası"}], "altitude_m": 750.0, "loops": 4}, {"action": "land", "at": {"kind": "named", "name": "Charlie noktası", "bogus": 1}}]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Lütfen irtifa bilgisini belirtir misiniz?_x", "missing": ["altitude_m"]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Komutu uygulayabilmem için hız (m/s) gerekli. Verir misiniz?"}, "valid": false}
+{"doc": {"type": null, "question": "Komutu uygulayabilmem için hız (m/s) gerekli. Verir misiniz?", "missing": ["speed_ms"]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 1500.0}, {"action": "set_speed", "speed_ms": 20.0}, {"action": "scan", "center": {"kind": "named", "name": "baraj"}, "radius_m": [], "altitude_m": 1000.0}, {"action": "return_to_launch"}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 1500.0}, {"action": "set_speed", "speed_ms": 20.0}, {"action": "scan", "center": {"kind": "named", "name": "baraj"}, "radius_m": 1000.0}, {"action": "return_to_launch"}]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Hedef bölge nedir?"}, "valid": false}
+{"doc": {"type": "clarification", "missing": ["center"]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Hız (m/s) nedir?", "missing": [null]}, "valid": false}
+{"doc": {"type": "clarification", "question": [], "missing": ["speed_ms"]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "abc", "speed_ms": 5.0}]}, "valid": false}
+{"doc": {"type": "clarification", "question": "İrtifa nedir?", "missing": [{}]}, "valid": false}
+{"doc": {"question": "Hız (m/s) nedir?", "missing": ["speed_ms"]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"altitude_m": 1500.0}]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Hız (m/s) nedir?", "missing": ["speed_ms_x"]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Hız (m/s) nedir?_x", "missing": ["speed_ms"]}, "valid": true}
+{"doc": {"type": "clarification", "question": "Hız (m/s) nedir?"}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "loiter", "center": {"kind": "coords", "lat": 37.89, "lon": 35.5}, "altitude_m": {}, "duration_s": 1200}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": null, "speed_ms": 5.0}]}, "valid": false}
+{"doc": {"type": null, "steps": [{"action": "set_speed", "speed_ms": 5.0}]}, "valid": false}
+{"doc": {"type": "clarification", "question": "Lütfen irtifa bilgisini belirtir misiniz?", "missing": ["abc"]}, "valid": true}
+{"doc": {"type": "clarification", "question": [], "missing": ["altitude_m", "radius_m"]}, "valid": false}
+{"doc": {"type": "clarification", "question": "İrtifa ve yarıçap bilgisini eksik aldım, netleştirir misiniz?", "missing": ["altitude_m_x", "radius_m"]}, "valid": true}
+{"doc": {"type": null, "question": "İrtifa ve yarıçap bilgisini eksik aldım, netleştirir misiniz?", "missing": ["altitude_m", "radius_m"]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 2000.0}, {"action": "set_speed", "speed_ms": []}, {"action": "loiter", "center": {"kind": "named", "name": "baraj"}, "altitude_m": 3000.0}, {"action": "land", "at": {"kind": "named", "name": "depo"}}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 9.99}, {"action": "set_speed", "speed_ms": 25.0}, {"action": "loiter", "center": {"kind": "named", "name": "baraj"}, "altitude_m": 3000.0}, {"action": "land", "at": {"kind": "named", "name": "depo"}}]}, "valid": false}
+{"doc": {"type": "clarification_x", "question": "İrtifa bilgisini eksik aldım, netleştirir misiniz?", "missing": ["altitude_m"]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "scan", "center": {"kind": "named"}, "radius_m": 3000.0, "altitude_m": 750.0}]}, "valid": false}
+{"doc": {"type": "clarification_x", "question": "Komutu uygulayabilmem için hedef nokta gerekli. Verir misiniz?", "missing": ["target"]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 1000.0}, {"action": "loiter", "center": {"kind": "named", "name": "baraj"}, "altitude_m": 0, "radius_m": 300.0, "duration_s": 1200}, {"action": "return_to_launch"}]}, "valid": false}
+{"doc": {"type": "plan", "steps": [{"action": "takeoff", "altitude_m": 100.0}, {"action": "patrol", "altitude_m": 500.0, "loops": 1}, {"action": "land", "at": {"kind": "named", "name": "sınır karakolu"}}]}, "valid": false}
+{"doc": {"type": "clarification_x", "question": "Yarıçap nedir?", "missing": ["radius_m"]}, "valid": false}
