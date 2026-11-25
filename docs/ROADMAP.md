@@ -41,10 +41,10 @@ Kısıtlar: **ücretsiz** araçlar, RTX 4060 Laptop (8 GB VRAM), 32 GB RAM, yaln
 - [x] C++ servis: llama.cpp motoru, HTTP uçları, sunucu tarafı şema doğrulaması, Prometheus metrikleri
 - [x] GoogleTest (15 test), Pydantic ile eşlik testi (263 vaka); doğrulayıcıya mutasyon testi yapıldı
 - [x] Python baseline servisi (FastAPI + HF) ve yük testi aracı yazıldı
-- [ ] Yük testi ölçümü: C++ vs Python p50/p95/p99 (GPU boşta olmalı, oyun/Godot kapalı)
+- [x] Yük testi ölçümü: C++ vs Python p50/p95/p99 (docs/RESULTS.md, Faz 7)
 - [ ] ~~ONNX Runtime motoru (C++ `InferenceEngine`)~~ ertelendi: onnxruntime-genai C başlıkları kaynak depodan alınamadı (microsoft/onnxruntime-genai 404), imzaları tahminle bağlamak riskli. ONNX ölçümü Python tarafında var (docs/RESULTS.md)
 - [x] A/B ağ geçidi (deterministik ağırlıklı atama, z-testi), Prometheus + Grafana yapılandırması, alarmlar
-- [ ] A/B için DPO v2 GGUF üretimi ve gerçek iki arka uçla deneme
+- [x] A/B için DPO v2 GGUF üretimi ve gerçek iki arka uçla deneme (anlamlı fark yok)
 - [x] Containerfile'lar, compose.yaml, K8s manifest'leri (kustomize) yazıldı ve yapısal olarak test edildi
 - [ ] Podman kurup imajları derlemek, kümede çalıştırmak; kubeconform/promtool doğrulaması
 

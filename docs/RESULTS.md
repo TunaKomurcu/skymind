@@ -198,3 +198,60 @@ bozulan ayrıştırıcıda testlerin başarısız olması (mutasyon).
 uv run --no-sync python -m skymind.rag.evaluate --seeds 1,2,3,4,5,6,7,8 --out outputs/eval/rag-8seeds.json
 uv run --no-sync pytest tests/test_rag.py tests/test_aviation.py
 ```
+
+# Faz 7: C++ servis vs Python servis (yük testi) ve A/B denemesi
+
+Aynı komutlar, aynı uçlar, aynı sunucu tarafı şema doğrulaması, aynı GPU (RTX 4060 Laptop, 8 GB).
+Kapalı döngü yük testi (`skymind/serve/loadtest.py`), düzey başına 60 istek, 5 ısınma isteği,
+istemci tarafı gecikme (kuyruk bekleme dahil). Servisler batch=1 ve tek bağlam: istekler sırayla işlenir.
+
+| Servis | Eşzamanlılık | İstek/sn | Token/sn | p50 | p95 | p99 |
+|---|---|---|---|---|---|---|
+| **C++ / llama.cpp Q5_K_M** | 1 | 3.91 | 136.8 | **258 ms** | 489 ms | 521 ms |
+| | 2 | 4.05 | 141.9 | 444 ms | 741 ms | 842 ms |
+| | 4 | 4.08 | 142.8 | 940 ms | 1300 ms | 1337 ms |
+| | 8 | 4.07 | 142.4 | 1953 ms | 2346 ms | 2397 ms |
+| **Python / HF transformers bf16** | 1 | 0.76 | 27.3 | **1243 ms** | 2652 ms | 2890 ms |
+| | 2 | 0.68 | 24.5 | 2728 ms | 4335 ms | 4525 ms |
+| | 4 | 0.62 | 22.2 | 5912 ms | 9440 ms | 9590 ms |
+| | 8 | 0.65 | 23.4 | 12171 ms | 14762 ms | 15221 ms |
+
+Hata: iki serviste de 0. Geçerli çıktı oranı: ikisinde 0.983 (59/60).
+
+## Okuma ve uyarılar
+1. **Tek istekte C++ yaklaşık 4.8× daha düşük p50 gecikme, ~5× daha yüksek token/sn verdi.** Ama bu
+   **iki yığının** karşılaştırması: model formatı da farklı (Q5_K_M nicemlenmiş GGUF vs bf16). Farkın
+   ne kadarının dilden, ne kadarının nicemlemeden (bellek bant genişliği) ve HF `generate`
+   döngüsünün Python yükünden geldiği **ayrıştırılmadı**. "C++ Python'dan 5× hızlı" diye okunmamalı.
+2. **Eşzamanlılıkla verim artmıyor, gecikme doğrusal artıyor** (iki serviste de): tek bağlam ve
+   batch=1 olduğu için beklenen davranış. Sürekli batching (vLLM benzeri) yok, bu bir sınırlama.
+3. **p99 bu örnek büyüklüğünde (n=60) neredeyse maksimuma eşit**, kararlı bir kuyruk istatistiği değil.
+4. **Ölçüm koşulları:** tek çalıştırma. Ölçüm sırasında arka planda video oynuyordu (GPU kullanımı
+   %3–35 arası, uzun sürmedi) ve sunucular BelowNormal öncelikteydi. Bellek karşılaştırması
+   **yapılmadı** (Python servisi için nvidia-smi toplam 3.7 GB gösterdi, C++ için ölçülmedi).
+5. Python tarafında llama-cpp-python gibi *aynı GGUF'u* Python'dan çalıştıran bir taban çizgisi
+   **yok**; saf dil farkını ölçecek karşılaştırma bu olurdu.
+
+## A/B denemesi (gateway önünde SFT vs DPO v2, ikisi de GGUF Q5_K_M, aynı GPU)
+400 farklı komut, eşzamanlılık 4, 50/50 ağırlık, deterministik atama (sft: 182, dpo: 223 istek).
+
+| Varyant | İstek | Geçerli çıktı | p50 | p95 |
+|---|---|---|---|---|
+| SFT | 182 | 0.9725 | 1188 ms | 2320 ms |
+| DPO v2 | 223 | 0.9776 | 1175 ms | 2236 ms |
+
+Geçerlilik farkı için iki oranlı z-testi p = 0.74: **anlamlı fark yok**. Ağ geçidi yalnızca
+geçerliliği karşılaştırabilir (altın etiket canlı trafikte yok); uydurma/alan doğruluğu için
+`docs/RESULTS.md` başındaki çevrimdışı değerlendirme geçerlidir. İki model aynı GPU'yu paylaştığı
+için gecikmeler tek sunucuyla ölçülenden yüksek (p50 ~1.2 s, c=4). Atama komut karmasına bağlı
+olduğu için bölme tam 50/50 çıkmaz (burada %45/%55).
+
+## Tekrar üretme
+```bash
+# C++ servis (Windows, hazır llama.dll yoluyla derlenmiş): cpp/README.md
+build\server\skymind_server.exe -m outputs\gguf\skymind-sft-Q5_K_M.gguf --port 8091 --ngl 99 --system cpp\configs\system_short.txt
+uv run --extra train python -m skymind.serve.app --model outputs/merged-sft --port 8092
+uv run python -m skymind.serve.loadtest --url http://127.0.0.1:8091 --name cpp-q5km-gpu --levels 1,2,4,8 --requests 60
+uv run python -m skymind.serve.gateway --variant sft=http://127.0.0.1:8091@50 --variant dpo=http://127.0.0.1:8093@50
+```
+Ham sonuçlar: `outputs/loadtest/*.json` (git'e girmez).
