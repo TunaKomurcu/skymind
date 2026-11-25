@@ -65,6 +65,10 @@ target-version = "py311"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
+[tool.ruff.lint.per-file-ignores]
+# kullanıcıya gösterilen uzun yönerge/yardım metinleri (satır bölmek okunabilirliği bozar)
+"skymind/data/review.py" = ["E501"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
