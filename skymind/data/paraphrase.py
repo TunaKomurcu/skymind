@@ -7,6 +7,7 @@ yarıçap->çap, uydurma yer/çağrı adı, yön ekleme) kural tabanlı olarak e
 
 from __future__ import annotations
 
+import ast
 import json
 import re
 from collections import Counter
@@ -111,6 +112,32 @@ def check_paraphrase(original: str, candidate: str) -> str | None:
 # --- üretim -----------------------------------------------------------------------------------
 
 
+_TEXT_KEYS = ("command", "text", "komut", "cümle", "sentence")
+
+
+def item_text(x: Any) -> str:
+    """Bir paraphrase öğesini düz metne çevirir.
+
+    Model bazen cümle yerine ``{"style": ..., "command": ...}`` nesnesi döndürür; ``str(x)`` bunu
+    sözlük metnine çevirip komut diye kaydederdi (veride 485 satırı etkiledi). Burada nesneden
+    metin alanı çıkarılır; daha önce metne çevrilmiş sözlükler (``"{'style': ...}"``) da onarılır.
+    """
+    if isinstance(x, dict):
+        for k in _TEXT_KEYS:
+            if isinstance(x.get(k), str):
+                return str(x[k])
+        return str(x)
+    s = str(x)
+    if s.lstrip().startswith("{") and s.rstrip().endswith("}"):
+        try:
+            d = ast.literal_eval(s)
+        except (ValueError, SyntaxError):
+            return s
+        if isinstance(d, dict):
+            return item_text(d)
+    return s
+
+
 def _parse(text: str) -> list[list[str]] | None:
     m = re.search(r"\{.*\}", text, re.S)
     if not m:
@@ -120,7 +147,7 @@ def _parse(text: str) -> list[list[str]] | None:
     except (json.JSONDecodeError, KeyError, TypeError):
         return None
     if isinstance(res, list) and all(isinstance(x, list) for x in res):
-        return [[str(s) for s in x] for x in res]
+        return [[item_text(s) for s in x] for x in res]
     return None
 
 

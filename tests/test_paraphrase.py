@@ -77,3 +77,18 @@ def test_paraphrase_batch_filters_and_handles_bad_json(tmp_path: Path) -> None:
     assert out == [["Kuzeydeki bölgeyi 3 km yarıçapta 1500 m irtifada incele"]]
     # farklı komut -> farklı önbellek anahtarı; bozuk JSON boş liste döndürür
     assert paraphrase_batch(c, ["Eve dön"], k=2, model="m") == [[]]
+
+
+def test_item_text_unwraps_dicts_and_repaired_dict_strings() -> None:
+    from skymind.data.paraphrase import _parse, item_text
+
+    assert item_text("düz cümle") == "düz cümle"
+    assert item_text({"style": "günlük", "command": "Kalk."}) == "Kalk."
+    assert (
+        item_text("{'style': 'kısa telsiz emri', 'command': 'Doğuya 1km geç.'}")
+        == "Doğuya 1km geç."
+    )
+    assert item_text("{süslü ama sözlük değil}") == "{süslü ama sözlük değil}"
+    assert item_text({"başka": 1}) == "{'başka': 1}"
+    raw = '{"results": [[{"style": "a", "command": "Birinci."}, "İkinci."]]}'
+    assert _parse(raw) == [["Birinci.", "İkinci."]]
