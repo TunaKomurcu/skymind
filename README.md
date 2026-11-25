@@ -4,7 +4,7 @@ Operatörün Türkçe komutunu doğrulanmış bir **JSON görev planına** çevi
 yerine **netleştirme sorusu** soran bir NLP/LLM araştırma prototipi. Yalnızca açık kaynak ve sentetik veri
 kullanır; gerçek operasyonel sistem iddiası yoktur.
 
-> Durum: Faz 0–4 tamam (veri, SFT, DPO), Faz 6 nicemleme tamam. Plan ve ilerleme: [`docs/ROADMAP.md`](docs/ROADMAP.md).
+> Durum: Faz 0–7 büyük ölçüde tamam (veri, SFT, DPO, niyet/NER, RAG, METAR/NOTAM, nicemleme, damıtma/budama, C++ servis, A/B). Kalan: gerçek küme denemesi, altın set gözden geçirme, final demo. Plan ve ilerleme: [`docs/ROADMAP.md`](docs/ROADMAP.md).
 > Kararlar: [`docs/adr/`](docs/adr/). Tüm sonuçlar ve uyarılar: [`docs/RESULTS.md`](docs/RESULTS.md).
 
 ## Planlayıcı sonuçları (400 test örneği)
@@ -53,3 +53,15 @@ Ayrıntı ve uyarılar: [`docs/RESULTS.md`](docs/RESULTS.md).
 
 CPU'da ONNX Runtime int4 (937 MB, 25 tok/s, alan doğruluğu 0.854) ile llama.cpp Q4_K_M (940 MB, 31 tok/s, 0.703)
 karşılaştırıldı; ONNX int4 gereksiz soruyu azaltıyor ama daha sık uyduruyor (0.037). Ayrıntı: `docs/RESULTS.md`.
+
+## Diğer sonuçlar (özet; ayrıntı ve uyarılar `docs/RESULTS.md`'de)
+
+* **C++ vs Python servis** (aynı GPU, batch 1): tek istekte p50 258 ms (llama.cpp Q5_K_M) vs 1243 ms (HF bf16),
+  ~4.8×; fark dil + nicemleme + yığın karışımı, saf dil farkı ayrıştırılmadı.
+* **A/B** (SFT vs DPO v2, 400 istek): geçerlilik 0.9725 vs 0.9776, p = 0.74, anlamlı fark yok.
+* **Niyet** (BERTurk): doğruluk 0.986, makro-F1 0.982 (TF-IDF: 0.962 / 0.851). **NER**: zayıf-etiket testi
+  döngüsel (kurallar da 0.994); elle yazılmış zor sette BERTurk 0.867 vs kurallar 0.853.
+* **RAG** (kurgusal kılavuz): hibrit R@5 0.852 (BM25 0.819/0.822). Üretken yanıtlayıcıda doğru parça gelince
+  doğruluk 0.94, cevapsız sorularda vazgeçme 24/24; atıf geçerliliği 1.0 ama desteklenme ölçülmedi.
+* **Sıkıştırma** (niyet sınıflandırıcı): katman azaltan öğrenciler CPU'da 2.0×/3.1×/5.2× hızlı, doğruluk bu görevde
+  tavana yakın (fark gürültü düzeyinde); kafa budama ≤1.3×, yapısal olmayan budama hız kazandırmaz.

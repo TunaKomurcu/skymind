@@ -34,8 +34,8 @@ Kısıtlar: **ücretsiz** araçlar, RTX 4060 Laptop (8 GB VRAM), 32 GB RAM, yaln
 ## Sprint 3 (Faz 6)
 - [x] Adaptör birleştirme, GGUF dönüşümü, F16/Q8/Q5/Q4/Q3 nicemleme, doğruluk-boyut-gecikme tablosu
 - [x] ONNX dışa aktarma (fp32/int4) + ONNX Runtime CPU ölçümü
-- [ ] Distillation (1.5B -> 0.5B)
-- [ ] Pruning deneyi
+- [x] Damıtma ve budama, niyet sınıflandırıcıda (BERTurk 12L → 6/4/2 katman; magnitude ve kafa budama), temiz yöntemle, 2 tohum: gecikme ve doğruluk `docs/RESULTS.md` Faz 5b
+- [ ] LLM damıtma (1.5B → 0.5B): yapılmadı, kapsam sınıflandırıcıyla sınırlı
 
 ## Sprint 4 (Faz 7)
 - [x] C++ servis: llama.cpp motoru, HTTP uçları, sunucu tarafı şema doğrulaması, Prometheus metrikleri
@@ -48,10 +48,16 @@ Kısıtlar: **ücretsiz** araçlar, RTX 4060 Laptop (8 GB VRAM), 32 GB RAM, yaln
 - [x] Containerfile'lar, compose.yaml, K8s manifest'leri (kustomize) yazıldı ve yapısal olarak test edildi
 - [ ] Podman kurup imajları derlemek, kümede çalıştırmak; kubeconform/promtool doğrulaması
 
+## Sprint 3b (Faz 2)
+- [x] Niyet (10 sınıf) ve NER (8 tür): TF-IDF/kural taban çizgileri, BERTurk ince ayar
+- [x] Zayıf NER etiketlerinin döngüselliği tespit edildi; bağımsız 42+ cümlelik elle set (Claude yazdı, sahibi gözden geçirmedi)
+- [x] Paraphrase veri hatası bulundu, düzeltildi, planlayıcılar yeniden ölçüldü (bulgu değişmedi)
+- [ ] NER elle setini proje sahibinin gözden geçirmesi
+
 ## Sprint 5 (Faz 5)
 - [x] Kurgusal kılavuz + soru seti, BM25 (+F5 kök), e5-small dense, RRF hibrit, 8 tohumlu ölçüm
 - [x] Cümle bazlı atıf (çıkarımsal yanıtlayıcı) ve atıf doğrulama
 - [x] METAR/NOTAM ayrıştırıcı, Türkçe özet, sentetik üretici, sayısal sadakat denetimi
-- [ ] Üretken (LLM) yanıtlayıcı + atıf/sadakat ölçümü (GPU gerekir)
+- [x] Üretken (LLM) yanıtlayıcı + atıf/vazgeçme ölçümü (gemma-3-27b, OpenRouter; R@3 darboğaz, atıf geçerliliği ≠ desteklenme)
 - [ ] LLM tabanlı NOTAM/METAR özeti ve kural tabanlıyla sadakat karşılaştırması (GPU gerekir)
 - [ ] Reranker denemesi
