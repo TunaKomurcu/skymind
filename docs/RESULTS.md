@@ -145,3 +145,56 @@ uv run --extra train --extra optimize python -m onnxruntime_genai.models.builder
     -m outputs/merged-sft -o outputs/onnx/int4-cpu -p int4 -e cpu
 uv run --extra optimize python -m skymind.optimize.eval_onnx --model-dir outputs/onnx/int4-cpu --name onnx-int4-cpu
 ```
+
+# Faz 5: RAG ve METAR/NOTAM özetleme
+
+## Retrieval (kurgusal "SkyMind X1/X2/X3" kılavuzu)
+
+Korpus **kurgusaldır** ve şablonlardan üretilir (`skymind/rag/corpus.py`): 91 parça, 240 soru, 3 araç
+modeli aynı cümle yapılarını farklı sayılarla tekrarlar, bu yüzden "benzer ama yanlış" pasajlar var.
+İki soru türü: `lexical` (kılavuzdaki sözcüklerle) ve `paraphrase` (eş anlamlı/dolaylı anlatım).
+Yoğun model: `intfloat/multilingual-e5-small` (CPU). Hibrit: RRF(BM25-F5, dense). 8 korpus tohumu,
+ortalama ± standart sapma, altın parça düzeyinde:
+
+| Yöntem | Tümü R@1 | Tümü R@5 | Tümü MRR | Paraphrase R@5 | Cümle isabeti |
+|---|---|---|---|---|---|
+| BM25 | 0.565±0.020 | 0.751±0.019 | 0.660±0.017 | 0.527±0.039 | 0.683 |
+| BM25 + F5 kök | 0.578±0.015 | 0.819±0.011 | 0.689±0.012 | 0.647±0.021 | 0.684 |
+| Dense (e5-small) | 0.526±0.012 | 0.822±0.012 | 0.659±0.005 | 0.663±0.021 | 0.693 |
+| **Hibrit (RRF)** | **0.586±0.011** | **0.852±0.015** | **0.706±0.010** | **0.710±0.025** | **0.703** |
+
+### Okuma ve uyarılar
+1. **Hibrit en iyi, ama kazanç küçük.** R@5'te BM25-F5 / dense'e göre +3 puan (≈2 sd), paraphrase
+   sorularında +5–6 puan. **R@1'de hibrit ile BM25-F5 farkı (0.586 vs 0.578) standart sapma içinde**,
+   üstünlük iddia etmiyorum.
+2. **Dense, kelime örtüşen sorularda BM25'ten kötü** (lexical R@1 0.719 vs 0.799): model adı ("X2")
+   ve hata kodu ("E-217") gibi tam eşleşmeler yoğun gömmede zayıf kalıyor. Hibritin gerekçesi bu.
+3. **Paraphrase R@1 hâlâ düşük (≤0.38).** Üç modelin neredeyse aynı cümleleri, doğru modeli seçmeyi
+   zorlaştırıyor; reranker denenmedi.
+4. **Cümle isabeti ~0.70**, ilk 3 parçadan seçilen cümlenin altın cümle olma oranı. Üst sınır
+   retrieval R@3 ile sınırlı. Seçici basit BM25; eğitilmiş bir cümle seçici/LLM denenmedi.
+5. **Genelleme uyarısı:** korpus ve sorular şablondan üretildi, gerçek kullanıcı sorularını ve gerçek
+   doküman gürültüsünü temsil etmez. Mutlak sayılar iyimser olabilir, yalnızca yöntemler arası
+   karşılaştırma anlamlıdır. Tek yoğun model (e5-small), reranker ve RAGAS tarzı LLM-tabanlı
+   faithfulness bu aşamada **yok**.
+
+## METAR/NOTAM (kural tabanlı, klasik NLP)
+
+`skymind/aviation/`: METAR ve NOTAM ayrıştırıcıları, Türkçe özet, sentetik üreticiler. Testler (22):
+el yazımı örnekler, 400 rastgele METAR ve 300 rastgele NOTAM ile gidiş-dönüş eşitliği, bilerek
+bozulan ayrıştırıcıda testlerin başarısız olması (mutasyon).
+
+- **Sayısal sadakat denetimi** (`faithfulness.py`): özetteki her sayı kaynaktan türetilebilir mi.
+  Kural tabanlı özetleyicide yapı gereği 0 uydurma sayı çıkar; denetim LLM özetlerini aynı ölçütle
+  ölçmek için yazıldı (henüz LLM özetleyici **yok**, ölçülmedi).
+- **Sınır:** kaynakta tesadüfen bulunan bir sayıyla çakışan uydurma sayıyı yakalamaz (alt sınır
+  ölçüsüdür). Yanlış yön/hadise gibi anlamsal hataları görmez.
+- **Gidiş-dönüş doğruluğu kapsam gösterir, genelleme değil:** üretici ve ayrıştırıcıyı aynı kişi
+  yazdı. Gerçek METAR/NOTAM akışı üzerinde ölçüm yapılmadı.
+- Uçuş uygunluk eşikleri (`Limits`) prototip değerleridir, SHGM/ICAO kuralı değildir.
+
+## Tekrar üretme
+```bash
+uv run --no-sync python -m skymind.rag.evaluate --seeds 1,2,3,4,5,6,7,8 --out outputs/eval/rag-8seeds.json
+uv run --no-sync pytest tests/test_rag.py tests/test_aviation.py
+```

@@ -47,3 +47,11 @@ Kısıtlar: **ücretsiz** araçlar, RTX 4060 Laptop (8 GB VRAM), 32 GB RAM, yaln
 - [ ] A/B için DPO v2 GGUF üretimi ve gerçek iki arka uçla deneme
 - [x] Containerfile'lar, compose.yaml, K8s manifest'leri (kustomize) yazıldı ve yapısal olarak test edildi
 - [ ] Podman kurup imajları derlemek, kümede çalıştırmak; kubeconform/promtool doğrulaması
+
+## Sprint 5 (Faz 5)
+- [x] Kurgusal kılavuz + soru seti, BM25 (+F5 kök), e5-small dense, RRF hibrit, 8 tohumlu ölçüm
+- [x] Cümle bazlı atıf (çıkarımsal yanıtlayıcı) ve atıf doğrulama
+- [x] METAR/NOTAM ayrıştırıcı, Türkçe özet, sentetik üretici, sayısal sadakat denetimi
+- [ ] Üretken (LLM) yanıtlayıcı + atıf/sadakat ölçümü (GPU gerekir)
+- [ ] LLM tabanlı NOTAM/METAR özeti ve kural tabanlıyla sadakat karşılaştırması (GPU gerekir)
+- [ ] Reranker denemesi

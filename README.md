@@ -30,7 +30,7 @@ uv run pytest
 ## Yapı
 
 ```
-skymind/    Python paketi (schemas, data, eval, planner, optimize, serve, ...)
+skymind/    Python paketi (schemas, data, eval, planner, optimize, serve, rag, aviation)
 cpp/        C++ çıkarım servisi (llama.cpp) + GoogleTest, bkz. cpp/README.md
 deploy/     A/B ağ geçidi, Prometheus/Grafana, Containerfile, compose, K8s, bkz. deploy/README.md
 tests/      pytest testleri
