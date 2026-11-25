@@ -276,18 +276,18 @@ doğruluktaki 2.4 puanlık fark yönü gösterir, aralığı değil.
 | Küme | BERTurk mikro-F1 | Kural tabanlı etiketleyici |
 |---|---|---|
 | Zayıf-etiket testi (n=688 cümle) | 0.9994 | 0.9936 |
-| Elle yazılmış KOLAY (20 cümle) | 1.000 | — |
+| Elle yazılmış KOLAY (22 cümle) | 1.000 | — |
 | Elle yazılmış ZOR (20 cümle) | 0.867 | 0.853 |
 
 1. **Zayıf-etiket testi bilgi taşımıyor.** Etiketler komut şablonlarının/planların aynı kurallarından
    çıktığı için kural tabanlı etiketleyici de 0.994 alıyor; BERTurk'ün 0.999'u "kuralları öğrendi"
    demek, "gerçek yazıma genelliyor" demek değil. Döngüsel bir ölçü.
 2. **Bağımsız sınama:** `data/gold/ner_manual.txt` (40 cümle, elle, `[metin|ETİKET]` imli). ZOR kısım
-   bilerek zor örnekler içerir (yazıyla sayılar, birimsiz ifadeler, dolaylı anlatım).
+   bilerek zor örnekler içerir (sayı sözcükleri, `saatte 72 kilometre`, `20 dk`, `2,5 km` yükseklik, şablon dışı yer adları).
    Farkın kaynağı tek varlık düzeyinde (BERTurk 0.867 vs kurallar 0.853): **BERTurk'ün kurallardan
    daha iyi olduğu söylenemez.** Zayıf noktalar ALT (F1 0.58) ve DUR (0.67); diğer türler 1.0.
-3. n=20/20 küçük: tek varlık hatası mikro-F1'i ~1–2 puan oynatır. Elle set tek kişi (ben) tarafından
-   yazıldı, dolayısıyla yazı üslubu önyargısı olabilir.
+3. n=22/20 küçük: tek varlık hatası mikro-F1'i ~1–2 puan oynatır. Elle set eğitim verisinden bağımsız ama
+   **Claude (asistan) tarafından yazıldı**, proje sahibi gözden geçirmedi; üslup önyargısı olabilir.
 
 ## Veri hatası ve düzeltmesi
 Paraphrase üretiminde `{style, command}` nesneleri metne çevrilmişti (485 satır bozuk). Ayrıştırıcı

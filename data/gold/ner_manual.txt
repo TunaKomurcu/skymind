@@ -2,7 +2,7 @@
 # Kurallar: birim varlığın içindedir ("[500 m|ALT]"); km/sa hızda "saatte" dahildir;
 # eklerle çekimli sözcük bütün olarak etiketlenir; COORD yalnızca sayıdır.
 # "ZOR" başlıklı bölüm şablon dışı ifadeler içerir (sayı sözcüğü, m/sn, ft, dk, bilinmeyen yer adı).
-# Yazar: proje sahibi tarafından, eğitim verisinden bağımsız ama küçük; yalnızca genelleme göstergesidir.
+# Yazar: Claude (asistan); proje sahibi gözden geçirmedi. Eğitim verisinden bağımsız ama küçük; yalnızca genelleme göstergesidir.
 ## KOLAY
 Lütfen [1500 metre|ALT] irtifaya çık.
 [kuzeye|DIR] [2 km|DIST] ilerle.
