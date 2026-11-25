@@ -1,6 +1,7 @@
 """RAG: korpus bütünlüğü, BM25, RRF, atıf doğrulama (sahte gömücüyle, ağsız)."""
 
 import hashlib
+import re
 from collections.abc import Sequence
 
 import numpy as np
@@ -113,3 +114,94 @@ def test_citation_parsing_and_verification_catch_fabricated_references() -> None
 @pytest.mark.parametrize("bad", ["", "atıf yok", "[abc, c1]"])
 def test_parse_citations_ignores_malformed(bad: str) -> None:
     assert parse_citations(bad) == []
+
+
+# --- üretken yanıtlayıcı ----------------------------------------------------------------------
+
+
+def _gen_imports():  # type: ignore[no-untyped-def]
+    from skymind.rag import generate as g
+
+    return g
+
+
+def test_is_correct_numeric_and_textual_proxies() -> None:
+    g = _gen_imports()
+    assert g.is_correct("Her 200 uçuş saatinde bir değiştirilir.", "200 uçuş saati")
+    assert not g.is_correct("Her 250 uçuş saatinde.", "200 uçuş saati")
+    assert g.is_correct("Hücre gerilimi 4,20 V olmalı", "4,20 V")
+    action = "Pitot tüpünü basınçlı hava ile temizleyin."
+    assert g.is_correct("Pitot tüpünü basınçlı hava ile temizlemelisiniz.", action)
+    assert not g.is_correct("Aracı yeniden başlatın.", action)
+
+
+def test_abstained_detection_is_robust_to_case_and_punctuation() -> None:
+    g = _gen_imports()
+    assert (
+        g.abstained("Bilgi bulunamadı.")
+        and g.abstained("  bilgi bulunamadı")
+        and g.abstained("BİLGİ BULUNAMADI!")
+    )
+    assert not g.abstained("Her 200 saatte bir [bakim#1, c0].")
+
+
+def test_prompt_numbers_sentences_the_way_citations_are_verified() -> None:
+    g = _gen_imports()
+    chunk = CORPUS.chunks[0]
+    msgs = g.build_messages("soru?", [chunk])
+    text = msgs[1]["content"]
+    assert f"[{chunk.id}]" in text and "  c0: " in text and text.endswith("Soru: soru?")
+    assert g.ABSTAIN in msgs[0]["content"]
+
+
+def test_unanswerable_questions_are_not_answerable_from_corpus() -> None:
+    g = _gen_imports()
+    qs = g.unanswerable_questions(24, seed=1)
+    assert len(qs) == 24 and len(set(qs)) == 24
+    assert all(
+        "X4" in q
+        or any(
+            w in q for w in ("kilogram", "watt", "kilometre", "inç", "malzeme", "fabrika", "kamera")
+        )
+        for q in qs
+    )
+    corpus_text = " ".join(c.text for c in CORPUS.chunks)
+    assert "X4" not in corpus_text and "fabrikada" not in corpus_text
+
+
+def _oracle_setup():  # type: ignore[no-untyped-def]
+    g = _gen_imports()
+    bm = BM25([c.text for c in CORPUS.chunks], stem5=True)
+    rank = lambda q: ranking(bm.scores(q))  # noqa: E731
+    return g, rank
+
+
+def test_evaluation_rewards_grounded_answers_and_flags_hallucination() -> None:
+    g, rank = _oracle_setup()
+    by_q = {qa.question: qa for qa in CORPUS.qas}
+
+    def grounded(messages: list[dict[str, str]]) -> str:
+        q = messages[1]["content"].rsplit("Soru: ", 1)[1]
+        qa = by_q.get(q)
+        shown = set(re.findall(r"^\[([a-z]+#\d+)\]$", messages[1]["content"], re.M))
+        if qa is None or qa.gold_chunk not in shown:  # pasajda yoksa dürüstçe vazgeç
+            return g.ABSTAIN
+        sents = split_sentences(next(c.text for c in CORPUS.chunks if c.id == qa.gold_chunk))
+        return f"{qa.gold_sentence} [{qa.gold_chunk}, c{sents.index(qa.gold_sentence)}]"
+
+    res = g.evaluate_generation(CORPUS, rank, grounded, 40, 10, k=5)["summary"]
+    assert res["unanswerable_abstain_rate"] == 1.0
+    assert res["citation_validity"] == 1.0 and res["answered_without_citation"] == 0.0
+    assert res["correct_given_gold_retrieved"] == 1.0
+    assert res["wrongly_abstained"] <= 1 - res["retrieval_recall_at_k"] + 1e-9
+    assert res["answered_with_unsupported_number"] == 0.0
+
+    def hallucinate(messages: list[dict[str, str]]) -> str:
+        return "Her 777 saatte bir yapılır [yok#9, c0]."
+
+    bad = g.evaluate_generation(CORPUS, rank, hallucinate, 20, 6, k=3)["summary"]
+    assert (
+        bad["unanswerable_abstain_rate"] == 0.0 and bad["unanswerable_answered_with_number"] == 1.0
+    )
+    assert bad["citation_validity"] == 0.0 and bad["answered_with_unsupported_number"] == 1.0
+    assert bad["correct"] == 0.0
