@@ -65,7 +65,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(rate(skymind_gateway_output_total{type=\"invalid\"}[5m])) / sum(rate(skymind_gateway_output_total[5m]))",
+          "expr": "(sum(rate(skymind_gateway_output_total{type=\"invalid\"}[5m])) or vector(0)) / sum(rate(skymind_gateway_output_total[5m]))",
           "legendFormat": "invalid",
           "refId": "A"
         }
@@ -243,7 +243,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (variant) (rate(skymind_gateway_output_total{type=\"invalid\"}[5m])) / sum by (variant) (rate(skymind_gateway_output_total[5m]))",
+          "expr": "(sum by (variant) (rate(skymind_gateway_output_total{type=\"invalid\"}[5m])) or sum by (variant) (rate(skymind_gateway_output_total[5m])) * 0) / sum by (variant) (rate(skymind_gateway_output_total[5m]))",
           "legendFormat": "{{variant}}",
           "refId": "A"
         }

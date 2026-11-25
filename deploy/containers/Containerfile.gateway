@@ -1,6 +1,6 @@
 # A/B ağ geçidi (FastAPI, ağır bağımlılık yok: torch/mlflow yok). Bağlam: depo kökü.
 #   podman build -f deploy/containers/Containerfile.gateway -t skymind-gateway .
-# Durum: Podman kurulu olmadığı için bu imaj henüz derlenmedi (bkz. Containerfile.cpp).
+# Durum: Podman 4.9.3 (rootless, WSL2) ile derlendi ve compose.yaml içinde çalıştırıldı (deploy/README.md).
 FROM docker.io/library/python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PIP_NO_CACHE_DIR=1
 WORKDIR /app

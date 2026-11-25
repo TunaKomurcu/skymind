@@ -43,8 +43,18 @@ farkı içindir; alan doğruluğu gibi metrikler için gold etiket gerekir ve ca
   tarafından sunuluyor, ve C++ ile Python servisleri aynı metrikleri tanımlıyor
   (`tests/test_deploy.py`, bilerek bozulan ad ve seçici ile test edildi). K8s manifest'leri yapısal
   olarak kontrol edildi: etiket/seçici eşleşmesi, ConfigMap ve PVC referansları, güvenlik bağlamı.
-- **Çalıştırılmadı:** Podman ve bir K8s kümesi bu makinede yok. Bu yüzden imajlar derlenmedi,
-  `compose.yaml` ve manifest'ler bir kümeye uygulanmadı, Prometheus/Grafana ayağa kaldırılmadı.
-  `kubectl kustomize`, `kubeconform` ve `promtool check` ile şema doğrulaması da henüz yapılmadı.
-- **Linux derlemesi:** `Containerfile.cpp` llama.cpp'yi kaynaktan derler. Windows'ta bu yol
-  Ninja takılması yüzünden doğrulanamamıştı; Linux'ta denenmedi.
+- **Podman'da çalıştırıldı (rootless Podman 4.9.3, WSL2 Ubuntu 24.04):** `Containerfile.cpp` (llama.cpp
+  Linux'ta kaynaktan, CPU, imaj 88 MB) ve `Containerfile.gateway` (144 MB) derlendi; `compose.yaml`
+  (`podman-compose` 1.6.0 ile) beş servisi ayağa kaldırdı. Gateway → C++ konteyneri (DPO GGUF, CPU) →
+  şemadan geçen geçerli plan döndü; `/ab/summary` çalıştı. Prometheus üç hedefi (`skymind-a`, `skymind-b`,
+  `gateway`) `up` gördü, 4 alarm kuralı yüklendi (`health: ok`), Grafana veri kaynağı ve pano sağlandı ve
+  panodaki 12 sorgunun hepsi canlı Prometheus'ta hatasız çalıştı. Bu çalıştırmada bir pano hatası bulundu ve
+  düzeltildi: hiç geçersiz çıktı yokken iki "geçersiz çıktı oranı" paneli boş kalıyordu (`or vector(0)`).
+- **Linux C++ derlemesi:** CI'ın `cpp` işiyle aynı komutlar (gcc 13.3, CMake 3.28) WSL'de çalıştırıldı:
+  15/15 GoogleTest geçti. GitHub Actions'ın kendisi çalıştırılmadı (repo uzak sunucuda değil).
+- **Sınırlar:** tek istek denendi (CPU'da 38 token ~12 sn, düşük öncelik ve iki konteyner altında; bir
+  hız ölçümü değildir). GPU'lu imaj yok; yalnızca CPU yolu. Pano panellerinin *görsel* doğruluğuna
+  bakılmadı, yalnızca sorguların çalıştığı doğrulandı. Grafana'ya tarayıcıdan girilmedi.
+- **Çalıştırılmadı:** Kubernetes kümesi yok; `k8s/` manifest'leri hiçbir kümeye uygulanmadı ve
+  `kubectl kustomize` / `kubeconform` / `promtool check` ile şema doğrulaması yapılmadı (yalnızca yapısal
+  pytest kontrolleri var). Prometheus ise konfigürasyonunu ve kurallarını canlı yükleyerek doğrulandı.

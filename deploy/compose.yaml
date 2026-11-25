@@ -2,7 +2,7 @@
 #   podman compose -f deploy/compose.yaml up --build
 #   -> ağ geçidi http://localhost:8000, Prometheus :9090, Grafana :3000 (admin/admin)
 #
-# Durum: yazıldı, Podman bu makinede kurulu olmadığından henüz çalıştırılmadı.
+# Durum: podman-compose 1.6.0 + Podman 4.9.3 (rootless, WSL2) ile çalıştırıldı (deploy/README.md).
 # İki model sürümü (A/B) için GGUF dosyaları outputs/gguf altında olmalı; adları değişkenle verilir:
 #   MODEL_A=skymind-sft-Q5_K_M.gguf MODEL_B=skymind-dpo-Q5_K_M.gguf
 x-backend: &backend

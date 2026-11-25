@@ -5,7 +5,7 @@ yerine **netleştirme sorusu** soran bir NLP/LLM araştırma prototipi. Yalnızc
 kullanır; gerçek operasyonel sistem iddiası yoktur.
 
 > Durum: Faz 0–7 büyük ölçüde tamam (veri, SFT, DPO, niyet/NER, RAG, METAR/NOTAM, nicemleme,
-> damıtma/budama, C++ servis, A/B, demo). Kalan: konteyner imajı derleme ve küme denemesi, altın set
+> damıtma/budama, C++ servis, A/B, Podman yığını, demo). Kalan: Kubernetes kümesi denemesi, altın set
 > gözden geçirme. Plan ve ilerleme: [`docs/ROADMAP.md`](docs/ROADMAP.md).
 > Kararlar: [`docs/adr/`](docs/adr/). Tüm sonuçlar ve uyarılar: [`docs/RESULTS.md`](docs/RESULTS.md).
 
@@ -52,7 +52,8 @@ yanlıştı ("yirmi beş m/s" için 20 m/s). Geçerli JSON doğru plan demek de�
   geçirilmedi**, sonuçlar bu yüzden sentetik test kümesindedir.
 * Planlayıcı için tek eğitim tohumu; SFT/DPO farkları küçük (A/B'de anlamlı değil, p = 0.74).
 * C++ ve Python servis karşılaştırması iki yığını birden karşılaştırır (nicemleme + dil); saf dil etkisi ayrılmadı.
-* Docker/Podman imajları ve Kubernetes manifest'leri bu makinede derlenmedi/uygulanmadı; yalnızca yapısal testler var.
+* Podman imajları derlendi ve compose yığını çalıştırıldı (yalnızca CPU, tek istek); **Kubernetes manifest'leri
+  hiçbir kümeye uygulanmadı** (yalnızca yapısal testler). GitHub Actions'ta CI çalıştırılmadı.
 * NER elle sınama seti (42 cümle) asistan tarafından yazıldı. Atıf geçerliliği ölçüsü desteklenmeyi göstermez.
 * Operasyonel güvenlik iddiası yoktur; uçuş uygunluk eşikleri prototip değerlerdir.
 
