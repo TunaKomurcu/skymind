@@ -379,3 +379,40 @@ uv run --extra train python -m skymind.nlp.compress_run --phase acc --seeds 0,1 
 uv run --extra train python -m skymind.nlp.compress_run --phase latency               # sessiz makinede
 uv run --no-sync pytest tests/test_nlp.py                                               # budama eşdeğerlik testi
 ```
+
+## Üretken RAG yanıtlayıcı (Faz 5, LLM ile)
+`skymind/rag/generate.py`: hibrit (BM25-F5 + e5-small, RRF) ilk 3 parça + cümle kimlikli prompt;
+`google/gemma-3-27b-it` (OpenRouter, sıcaklık 0). 60 cevaplanabilir soru (31 sözcüksel, 29 paraphrase) ve
+**kılavuzda olmayan** 24 soru (tanımsız "X4" modeli, hiç yer almayan özellikler). Tek koşu, tek tohum
+(3); toplam OpenRouter harcaması ~0.19 USD (limit 4).
+
+| Ölçü | Değer |
+|---|---|
+| Doğru parça ilk 3'te (R@3) | 0.817 |
+| Doğru cevap (60 sorunun) | 0.767 |
+| Doğru cevap | doğru parça gelmişse | **0.939** (46/49) |
+| Yanlışlıkla "Bilgi bulunamadı" | 0.183 (11/60; 8'i parça gelmediği için) |
+| Atıf geçerliliği (var olan parça+cümle) | 1.000 |
+| Cevap verip atıfsız bırakma | 0.000 |
+| Atıf altın cümleyi gösteriyor (tüm sorular) | 0.733 (cevap verilenlerde 44/49) |
+| Cevapta kaynaklarda olmayan sayı | 0.000 |
+| **Cevapsız sorularda vazgeçme** | **1.000** (24/24) |
+
+Sözcüksel sorularda doğruluk 31/31, paraphrase'te 0.517 (R@3 0.62).
+
+### Okuma ve uyarılar
+1. **Ana darboğaz üretici değil retrieval:** doğru parça geldiğinde doğruluk %94; gelmediğinde model
+   8/11 kez dürüstçe vazgeçti, 3 kez **yanlış parçadan, makul görünen yanlış cevap** verdi
+   (ör. X2 sorusuna başka modelin hata kodunu/değerini, geçerli bir atıfla).
+2. **Atıf geçerliliği 1.0 desteklenme anlamına gelmez.** Ölçü yalnızca atfın var olan bir parça+cümleyi
+   gösterdiğini doğrular; o cümlenin cevabı gerçekten desteklediğini değil. Yukarıdaki 3 yanlış cevap
+   geçerli atıf taşıyor. Desteklenme (NLI/insan) ölçülmedi.
+3. "Kaynaklarda olmayan sayı 0" alt sınır: sayı doğrulaması sayının kaynak parçalarda *herhangi bir yerde*
+   geçmesine bakar (üç model benzer değerler paylaştığı için çarpışma olabilir).
+4. Cevapsız soru kümesi küçük ve şablon tabanlı (24); "1.0 vazgeçme" bu şablon sorular için geçerli,
+   kurnaz/çelişkili sorular için kanıt değil. Vekil doğruluk metriği (sayı eşleşmesi / kök örtüşmesi)
+   kaba; elle denetlenmedi. Tek model, tek koşu: model karşılaştırması veya güven aralığı yok.
+
+```bash
+uv run --extra train python -m skymind.rag.generate --model google/gemma-3-27b-it --n 60 --out outputs/eval/rag-gen.json
+```
