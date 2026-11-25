@@ -51,7 +51,8 @@ yanlıştı ("yirmi beş m/s" için 20 m/s). Geçerli JSON doğru plan demek de�
 * Tüm veri sentetik; test seti dağılım içi. 300 örneklik altın küme **henüz insan tarafından gözden
   geçirilmedi**, sonuçlar bu yüzden sentetik test kümesindedir.
 * Planlayıcı için tek eğitim tohumu; SFT/DPO farkları küçük (A/B'de anlamlı değil, p = 0.74).
-* C++ ve Python servis karşılaştırması iki yığını birden karşılaştırır (nicemleme + dil); saf dil etkisi ayrılmadı.
+* C++ vs HF servis farkı (~4.8×) iki yığını birden karşılaştırır; aynı GGUF ve aynı llama.cpp ikilileriyle ölçülen saf
+  dil payı ~%6–7'dir. Python servisinin ana bellek (RAM) ölçümü geçersiz çıktı, raporlanmıyor.
 * Podman imajları derlendi ve compose yığını çalıştırıldı (yalnızca CPU, tek istek); **Kubernetes manifest'leri
   hiçbir kümeye uygulanmadı** (yalnızca yapısal testler). GitHub Actions'ta CI çalıştırılmadı.
 * NER elle sınama seti (42 cümle) asistan tarafından yazıldı. Atıf geçerliliği ölçüsü desteklenmeyi göstermez.
@@ -107,7 +108,8 @@ karşılaştırıldı; ONNX int4 gereksiz soruyu azaltıyor ama daha sık uyduru
 ## Diğer sonuçlar (özet; ayrıntı ve uyarılar `docs/RESULTS.md`'de)
 
 * **C++ vs Python servis** (aynı GPU, batch 1): tek istekte p50 258 ms (llama.cpp Q5_K_M) vs 1243 ms (HF bf16),
-  ~4.8×; fark dil + nicemleme + yığın karışımı, saf dil farkı ayrıştırılmadı.
+  ~4.8×; fark çoğunlukla HF yığını ve model biçimi. **Aynı GGUF ve aynı llama.cpp ikilileriyle** Python (FastAPI +
+  llama-cpp-python) yalnızca ~%6–7 daha düşük verim verdi (122 vs 131 tok/s), GPU belleği aynı.
 * **A/B** (SFT vs DPO v2, 400 istek): geçerlilik 0.9725 vs 0.9776, p = 0.74, anlamlı fark yok.
 * **Niyet** (BERTurk): doğruluk 0.986, makro-F1 0.982 (TF-IDF: 0.962 / 0.851). **NER**: zayıf-etiket testi
   döngüsel (kurallar da 0.994); elle yazılmış zor sette BERTurk 0.867 vs kurallar 0.853.
@@ -115,5 +117,7 @@ karşılaştırıldı; ONNX int4 gereksiz soruyu azaltıyor ama daha sık uyduru
   doğruluk 0.94, cevapsız sorularda vazgeçme 24/24; atıf geçerliliği 1.0 ama desteklenme ölçülmedi.
 * **Sıkıştırma** (niyet sınıflandırıcı): katman azaltan öğrenciler CPU'da 2.0×/3.1×/5.2× hızlı, doğruluk bu görevde
   tavana yakın (fark gürültü düzeyinde); kafa budama ≤1.3×, yapısal olmayan budama hız kazandırmaz.
-* **METAR/NOTAM özeti:** kural tabanlı özetleyici sayısal olarak sadık (yapı gereği); LLM (gemma-3 27B) 80 METAR'ın
-  %35'inde, 48 NOTAM'ın %31'inde kaynakta olmayan sayı üretti (NOTAM tarih kodunu sık yanlış okuyor); 4B daha kötü.
+* **METAR/NOTAM özeti:** kural tabanlı özetleyici sayısal olarak sadık (yapı gereği). LLM (gemma-3 27B) sıfır-örnekle
+  80 METAR'ın %35'inde, 48 NOTAM'ın %31'inde kaynakta olmayan sayı üretti (NOTAM tarih kodunu sık yanlış okuyor).
+  Few-shot prompt (yeni tohumda ölçüldü) NOTAM'da uydurma sayıyı %33 → %4'e indirdi ama METAR rakam okuma hataları
+  sürdü (%20 → %19); 4B daha kötü. Sayı denetimi hâlâ gerekli.
