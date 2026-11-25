@@ -307,3 +307,75 @@ uv run python -m skymind.nlp.baselines
 uv run --extra train python -m skymind.nlp.train --task intent --name intent-berturk
 uv run --extra train python -m skymind.nlp.train --task ner --name ner-berturk
 ```
+
+# Faz 5b: sıkıştırma — damıtma ve budama (niyet sınıflandırıcı, BERTurk 12 katman)
+
+Hedef sorular: öğrenci ne kadar küçülür/hızlanır, ne kadar doğruluk kaybeder; KD, aynı bütçede düz
+çapraz entropiden (CE) iyi mi; budama gerçekten hız kazandırıyor mu? Test: niyet, n=1477.
+
+**Yöntem (ilk koşu kirliydi, yeniden tasarlandı):** ilk sürümde öğrenciler ince ayarlı öğretmenin
+ağırlıklarından başlayıp fazladan eğitim almış, gecikmeler de ben başka iş yaparken ölçülmüştü
+(`outputs/nlp/compress-v1-confounded.json`, kullanılmıyor). Şimdi:
+* Öğrenciler **önceden eğitilmiş BERT**'in katman alt kümesinden başlar (6L: 0,2,4,6,8,10; 4L: 0,4,8,11;
+  2L: 0,11), öğretmenle aynı 3 epoch. KD = CE + öğretmen yumuşak hedefleri.
+* Budamalı satırlar öğretmen + **1 epoch** ince ayar alır; adil kıyas için kontrol: `teacher-ft1`
+  (budamasız, 1 epoch ek). 2 tohum (0,1), ortalama ± standart sapma.
+* **Gecikme doğruluktan ayrı ölçülür** ve yalnızca mimariye bağlıdır (eğitimsiz mimariler): ısınma,
+  5 dönüşümlü tur, en küçük p50; batch 1, CPU 4 iş parçacığı ve GPU (RTX 4060 Laptop).
+
+## Gecikme (batch 1, medyan)
+| Varyant | Parametre | CPU p50 | Hızlanma | GPU p50 | Hızlanma |
+|---|---|---|---|---|---|
+| öğretmen 12L | 110.6M | 27.9 ms | 1.00× | 6.3 ms | 1.00× |
+| öğrenci 6L | 68.1M | 13.8 ms | **2.0×** | 3.3 ms | 1.9× |
+| öğrenci 4L | 53.9M | 9.1 ms | **3.1×** | 2.5 ms | 2.6× |
+| öğrenci 2L | 39.7M | 5.4 ms | **5.2×** | 1.6 ms | 3.9× |
+| kafa budama %30 | 102.2M | 28.9 ms | 0.96× | 6.5 ms | 0.97× |
+| kafa budama %50 | 96.5M | 22.7 ms | 1.2× | 6.2 ms | 1.0× |
+| kafa budama %70 | 90.9M | 22.0 ms | 1.3× | 6.0 ms | 1.05× |
+| magnitude %80 (yoğun çekirdek) | 110.6M | 27.9 ms | 1.0× | 6.2 ms | 1.0× |
+
+## Doğruluk (2 tohum, ort. ± sd)
+| Varyant | Doğruluk | Makro-F1 | Sıfır olmayan param. |
+|---|---|---|---|
+| öğretmen 12L (3 epoch, tek model) | 0.9858 | 0.9816 | 110.6M |
+| **teacher-ft1 (kontrol, +1 epoch)** | 0.9902 ± 0.0034 | 0.9887 ± 0.0057 | 110.6M |
+| öğrenci 6L KD | 0.9770 ± 0.0038 | 0.8678 ± 0.0053 | 68.1M |
+| öğrenci 6L CE | 0.9909 ± 0.0015 | 0.8920 ± 0.0008 | 68.1M |
+| öğrenci 4L KD | 0.9875 ± 0.0014 | 0.9833 ± 0.0003 | 53.9M |
+| öğrenci 4L CE | 0.9688 ± 0.0077 | 0.9421 ± 0.0199 | 53.9M |
+| öğrenci 2L KD | 0.9865 ± 0.0019 | 0.8874 ± 0.0005 | 39.7M |
+| öğrenci 2L CE | 0.9776 ± 0.0105 | 0.8751 ± 0.0181 | 39.7M |
+| magnitude %50 + 1 epoch | 0.9905 ± 0.0000 | 0.9407 ± 0.0689 | 68.2M |
+| magnitude %80 + 1 epoch | 0.8656 ± 0.0052 | 0.7636 ± 0.0070 | 42.7M |
+| kafa budama %30 + 1 epoch | 0.9919 ± 0.0010 | 0.9421 ± 0.0705 | 102.2M |
+| kafa budama %50 + 1 epoch | 0.9902 ± 0.0034 | 0.8916 ± 0.0030 | 96.5M |
+| kafa budama %70 + 1 epoch | 0.9912 ± 0.0028 | 0.9422 ± 0.0679 | 90.9M |
+
+## Okuma ve uyarılar
+1. **Hız kazancı yalnızca katman çıkarmaktan geliyor.** 2/4/6 katmanlı öğrenciler CPU'da 5.2×/3.1×/2.0×
+   hızlı; kafa budama en iyi ~1.3× (CPU), GPU'da ~1.0×; yapısal olmayan (magnitude) budama **hiç hızlandırmaz**:
+   sıfırlanmış ağırlıklar yoğun matris çarpımında yine hesaplanır, "sıfır olmayan parametre" azalması
+   gecikmeye yansımaz. Kafa budama %30 ölçüm gürültüsü sınırında (0.96×, yani hızlanma yok).
+2. **Doğruluk bu görevde tavana yakın ve farklar küçük.** 1477 örnekte 0.3 puan ≈ 4–5 örnek; 2 tohumla
+   çoğu farkın (örn. 6L CE 0.991 vs ft1 kontrolü 0.990) yönü bile güvenilir değil. Hiçbir sıkıştırma
+   varyantı "kayıpsız" olarak sunulmamalı; yalnızca magnitude %80 açıkça çöküyor (0.866).
+3. **Öğretmen (0.986) kendi +1 epoch kontrolünden (0.990) düşük:** öğretmen biraz eksik eğitilmişti.
+   Sıkıştırılmış modellerin "öğretmenden iyi" görünmesi kısmen ek eğitimden gelir; bu yüzden
+   karşılaştırma `teacher-ft1`'e göre yapılmalı.
+4. **KD'nin CE'ye üstünlüğü tutarsız:** 4L ve 2L'de KD daha iyi (0.988 vs 0.969, 0.987 vs 0.978),
+   6L'de CE daha iyi (0.977 vs 0.991). İki tohumla "KD yardım eder" denemez; bu deneyde tutarlı bir
+   KD kazancı **gösterilmedi**.
+5. **Makro-F1 neredeyse iki kipli (~0.89 ya da ~0.94–0.99) ve sd büyük.** Doğruluk 0.99 iken makro-F1'in
+   0.89'a düşmesi, bir az örnekli sınıfın bazı koşularda hiç doğru bulunmadığını gösteriyor. Hangi
+   sınıf olduğunu koşu başına sınıf raporu kaydetmediğim için **doğrulamadım** (tahmin: test kümesinde
+   en az örnekli niyet). Makro-F1 farkları bu yüzden doğruluktan daha gürültülü okunmalı.
+6. Tek veri kümesi, tek görev (niyet), 2 tohum, öğrenci eğitimi 3 epoch. Parametre sayısı ≠ gecikme;
+   gecikme kendi donanımımda ölçüldü (4 iş parçacığı), başka CPU'da oranlar değişebilir.
+
+## Tekrar üretme
+```bash
+uv run --extra train python -m skymind.nlp.compress_run --phase acc --seeds 0,1      # ~25 dk, GPU
+uv run --extra train python -m skymind.nlp.compress_run --phase latency               # sessiz makinede
+uv run --no-sync pytest tests/test_nlp.py                                               # budama eşdeğerlik testi
+```
