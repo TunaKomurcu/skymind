@@ -255,3 +255,55 @@ uv run python -m skymind.serve.loadtest --url http://127.0.0.1:8091 --name cpp-q
 uv run python -m skymind.serve.gateway --variant sft=http://127.0.0.1:8091@50 --variant dpo=http://127.0.0.1:8093@50
 ```
 Ham sonuçlar: `outputs/loadtest/*.json` (git'e girmez).
+
+# Faz 2: klasik NLP — niyet sınıflandırma ve varlık çıkarımı (NER)
+
+Veri: planlayıcı bölümleriyle aynı bölümler (`data/processed`). Niyet = planın baskın eylemi veya
+`clarification`/`refusal` (10 sınıf, test n=1477). NER: 8 varlık türü (ALT, RADIUS, DIST, SPEED, DUR,
+COORD, PLACE, DIR); etiketler komut metnine altın plan değerlerinin hizalanmasıyla **zayıf** üretildi
+(kapsama %95.9, hizalanamayanlar atıldı). BERTurk (`dbmdz/bert-base-turkish-cased`) ince ayar, tek tohum.
+
+## Niyet (test, n=1477)
+| Model | Doğruluk | Makro-F1 |
+|---|---|---|
+| TF-IDF + lojistik regresyon | 0.9621 | 0.8505 |
+| BERTurk ince ayar (3 epoch, ~200 sn) | **0.9858** | **0.9816** |
+
+Makro-F1 farkı doğruluktan çok daha büyük: TF-IDF az örnekli sınıflarda zayıf. Tek tohum olduğu için
+doğruluktaki 2.4 puanlık fark yönü gösterir, aralığı değil.
+
+## NER: neden iki ayrı test
+| Küme | BERTurk mikro-F1 | Kural tabanlı etiketleyici |
+|---|---|---|
+| Zayıf-etiket testi (n=688 cümle) | 0.9994 | 0.9936 |
+| Elle yazılmış KOLAY (20 cümle) | 1.000 | — |
+| Elle yazılmış ZOR (20 cümle) | 0.867 | 0.853 |
+
+1. **Zayıf-etiket testi bilgi taşımıyor.** Etiketler komut şablonlarının/planların aynı kurallarından
+   çıktığı için kural tabanlı etiketleyici de 0.994 alıyor; BERTurk'ün 0.999'u "kuralları öğrendi"
+   demek, "gerçek yazıma genelliyor" demek değil. Döngüsel bir ölçü.
+2. **Bağımsız sınama:** `data/gold/ner_manual.txt` (40 cümle, elle, `[metin|ETİKET]` imli). ZOR kısım
+   bilerek zor örnekler içerir (yazıyla sayılar, birimsiz ifadeler, dolaylı anlatım).
+   Farkın kaynağı tek varlık düzeyinde (BERTurk 0.867 vs kurallar 0.853): **BERTurk'ün kurallardan
+   daha iyi olduğu söylenemez.** Zayıf noktalar ALT (F1 0.58) ve DUR (0.67); diğer türler 1.0.
+3. n=20/20 küçük: tek varlık hatası mikro-F1'i ~1–2 puan oynatır. Elle set tek kişi (ben) tarafından
+   yazıldı, dolayısıyla yazı üslubu önyargısı olabilir.
+
+## Veri hatası ve düzeltmesi
+Paraphrase üretiminde `{style, command}` nesneleri metne çevrilmişti (485 satır bozuk). Ayrıştırıcı
+düzeltildi (`item_text`), veri onarıldı (`skymind/data/repair.py`), bölümler yeniden üretildi (eski
+hali `outputs/data-backup/`). Planlayıcılar temiz test kümesinde yeniden ölçüldü:
+
+| | Alan doğruluğu (önce → sonra) |
+|---|---|
+| SFT | 0.842 → 0.842 |
+| DPO | 0.848 → 0.850 |
+
+Sonuçlar ve sıralama değişmedi. Altın aday dosyası etkilenmemişti.
+
+## Tekrar üretme
+```bash
+uv run python -m skymind.nlp.baselines
+uv run --extra train python -m skymind.nlp.train --task intent --name intent-berturk
+uv run --extra train python -m skymind.nlp.train --task ner --name ner-berturk
+```
