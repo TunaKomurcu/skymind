@@ -1,0 +1,34 @@
+groups:
+  - name: skymind
+    rules:
+      - alert: SkymindTargetDown
+        expr: up == 0
+        for: 1m
+        labels: { severity: critical }
+        annotations:
+          summary: "{{ $labels.instance }} ölçülemiyor"
+
+      - alert: SkymindHighInvalidOutputRate
+        expr: |
+          sum by (variant) (rate(skymind_gateway_output_total{type="invalid"}[10m]))
+            / sum by (variant) (rate(skymind_gateway_output_total[10m])) > 0.10
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: "{{ $labels.variant }} varyantı şemaya uymayan çıktı üretiyor (>%10)"
+
+      - alert: SkymindHighLatencyP95
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le, variant) (rate(skymind_gateway_request_duration_seconds_bucket[5m]))) > 2
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: "{{ $labels.variant }} p95 gecikme 2 sn üstünde"
+
+      - alert: SkymindUpstreamErrors
+        expr: sum by (variant) (rate(skymind_gateway_requests_total{status="upstream_error"}[5m])) > 0
+        for: 2m
+        labels: { severity: critical }
+        annotations:
+          summary: "{{ $labels.variant }} arka ucu yanıt vermiyor"

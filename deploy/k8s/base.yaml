@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: skymind
+---
+# Model dosyaları için ortak, salt okunur birim. kind/k3s'te varsayılan StorageClass kullanılır;
+# GGUF dosyalarını bir kez kopyalayın (bkz. deploy/README.md).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: skymind-models
+  namespace: skymind
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 4Gi

@@ -1,0 +1,14 @@
+# Konteyner derleme bağlamına model, ham veri ve derleme çıktıları girmesin
+.git
+.venv
+build/
+third_party/
+outputs/
+mlruns/
+data/
+docs/
+**/__pycache__
+.mypy_cache
+.ruff_cache
+.pytest_cache
+.env

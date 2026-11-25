@@ -1,0 +1,23 @@
+# kubectl apply -k deploy        (ya da: kubectl kustomize deploy | kubectl apply -f -)
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: skymind
+resources:
+  - k8s/base.yaml
+  - k8s/backends.yaml
+  - k8s/gateway.yaml
+  - k8s/monitoring.yaml
+configMapGenerator:
+  - name: prometheus-config
+    files:
+      - prometheus.yml=prometheus/prometheus.k8s.yml
+      - alerts.yml=prometheus/alerts.yml
+  - name: grafana-datasources
+    files:
+      - prometheus.yml=grafana/provisioning/datasources/prometheus.yml
+  - name: grafana-dashboard-provider
+    files:
+      - dashboards.yml=grafana/provisioning/dashboards/dashboards.yml
+  - name: grafana-dashboards
+    files:
+      - skymind.json=grafana/dashboards/skymind.json

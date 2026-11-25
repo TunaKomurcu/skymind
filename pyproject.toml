@@ -17,6 +17,7 @@ dev = [
     "mypy>=1.10",
     "jsonschema>=4.22",
     "mlflow>=3.18",
+    "pyyaml>=6",
 ]
 train = [
     "torch>=2.5",

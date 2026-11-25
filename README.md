@@ -30,9 +30,11 @@ uv run pytest
 ## Yapı
 
 ```
-skymind/    Python paketi (schemas, data, eval, nlp, planner, rag, ...)
+skymind/    Python paketi (schemas, data, eval, planner, optimize, serve, ...)
+cpp/        C++ çıkarım servisi (llama.cpp) + GoogleTest, bkz. cpp/README.md
+deploy/     A/B ağ geçidi, Prometheus/Grafana, Containerfile, compose, K8s, bkz. deploy/README.md
 tests/      pytest testleri
-docs/       yol haritası, ADR'ler
+docs/       yol haritası, ADR'ler, sonuçlar
 ```
 
 Mimari diyagram, sonuç tabloları ve tekrar üretme adımları fazlar ilerledikçe buraya eklenecek.

@@ -1,0 +1,108 @@
+# İki model sürümü: variant=a (kontrol) ve variant=b (aday). Model dosyası MODEL ortam değişkeninde.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: skymind-a
+  namespace: skymind
+  labels: { app: skymind-backend, variant: a }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: skymind-backend, variant: a }
+  template:
+    metadata:
+      labels: { app: skymind-backend, variant: a }
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+    spec:
+      securityContext: { runAsNonRoot: true, runAsUser: 10001, seccompProfile: { type: RuntimeDefault } }
+      containers:
+        - name: server
+          image: skymind-cpp:latest
+          imagePullPolicy: IfNotPresent
+          args: ["-m", "/models/skymind-sft-Q5_K_M.gguf"]
+          ports: [{ name: http, containerPort: 8080 }]
+          readinessProbe:
+            httpGet: { path: /healthz, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          resources:
+            requests: { cpu: "1", memory: 2Gi }
+            limits: { memory: 3Gi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+          volumeMounts:
+            - { name: models, mountPath: /models, readOnly: true }
+      volumes:
+        - name: models
+          persistentVolumeClaim: { claimName: skymind-models, readOnly: true }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: skymind-a
+  namespace: skymind
+spec:
+  selector: { app: skymind-backend, variant: a }
+  ports: [{ name: http, port: 8080, targetPort: http }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: skymind-b
+  namespace: skymind
+  labels: { app: skymind-backend, variant: b }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: skymind-backend, variant: b }
+  template:
+    metadata:
+      labels: { app: skymind-backend, variant: b }
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+    spec:
+      securityContext: { runAsNonRoot: true, runAsUser: 10001, seccompProfile: { type: RuntimeDefault } }
+      containers:
+        - name: server
+          image: skymind-cpp:latest
+          imagePullPolicy: IfNotPresent
+          args: ["-m", "/models/skymind-dpo-Q5_K_M.gguf"]
+          ports: [{ name: http, containerPort: 8080 }]
+          readinessProbe:
+            httpGet: { path: /healthz, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          resources:
+            requests: { cpu: "1", memory: 2Gi }
+            limits: { memory: 3Gi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+          volumeMounts:
+            - { name: models, mountPath: /models, readOnly: true }
+      volumes:
+        - name: models
+          persistentVolumeClaim: { claimName: skymind-models, readOnly: true }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: skymind-b
+  namespace: skymind
+spec:
+  selector: { app: skymind-backend, variant: b }
+  ports: [{ name: http, port: 8080, targetPort: http }]

@@ -1,0 +1,14 @@
+# A/B ağ geçidi (FastAPI, ağır bağımlılık yok: torch/mlflow yok). Bağlam: depo kökü.
+#   podman build -f deploy/containers/Containerfile.gateway -t skymind-gateway .
+# Durum: Podman kurulu olmadığı için bu imaj henüz derlenmedi (bkz. Containerfile.cpp).
+FROM docker.io/library/python:3.12-slim
+ENV PYTHONDONTWRITEBYTECODE=1 PIP_NO_CACHE_DIR=1
+WORKDIR /app
+COPY pyproject.toml README.md ./
+COPY skymind/ skymind/
+RUN pip install ".[serve]" && useradd --system --uid 10001 --no-create-home skymind
+USER 10001
+EXPOSE 8000
+ENTRYPOINT ["python", "-m", "skymind.serve.gateway", "--host", "0.0.0.0", "--port", "8000"]
+# Varyantlar çalışma anında verilir: --variant ad=http://servis:8080@ağırlık
+CMD ["--variant", "a=http://skymind-a:8080@50", "--variant", "b=http://skymind-b:8080@50"]
