@@ -201,3 +201,56 @@ def test_notam_roundtrip_and_numeric_faithfulness_on_random_structures() -> None
         assert got.q is not None and gold.q is not None and got.q.code == gold.q.code
         assert (got.q.center, got.q.radius_nm) == (gold.q.center, gold.q.radius_nm)
         assert unsupported_numbers(notam_summary(got), source_numbers_notam(got)) == [], text
+
+
+# --- LLM özetleme değerlendirmesi (ağsız) ------------------------------------------------------
+
+
+def test_summary_metrics_give_rule_based_summaries_a_perfect_score() -> None:
+    """Metrik doğrulaması: kural tabanlı özetleyici hiçbir ölçüde ceza almamalı."""
+    from skymind.aviation import llm_summary as ls
+
+    rows, summ = ls.run(ls.build_cases(60, 40, seed=4), ls.rule_based)
+    for kind in ("metar", "notam"):
+        assert summ[kind]["fact_recall_mean"] == 1.0, [r for r in rows if r["missing"]][:2]
+        assert summ[kind]["with_unsupported_number"] == 0.0
+        assert summ[kind]["semantic_error"] == 0.0
+
+
+def test_summary_metrics_catch_mutated_summaries() -> None:
+    from skymind.aviation import llm_summary as ls
+
+    text = "METAR LTBA 121050Z 22012G22KT 4000 -RA BKN015 M03/M05 Q1008"
+    ok = ls.score_case(
+        "metar",
+        text,
+        "LTBA: rüzgâr güneybatıdan 12 kt, hamle 22 kt; görüş 4 km; bulut 1500 ft; "
+        "sıcaklık -3°C, çiğ noktası -5°C; QNH 1008.",
+    )
+    assert ok["recall"] == 1.0 and not ok["unsupported"] and not ok["semantic_error"]
+    # yön çelişkisi
+    bad_dir = ls.score_case("metar", text, "Rüzgâr kuzeyden 12 kt, hamle 22 kt.")
+    assert bad_dir["semantic_error"] is True
+    # eksi işareti düşmüş: sıcaklık +3 gibi okunur -> bilgi eksik sayılır
+    no_sign = ls.score_case("metar", text, "Sıcaklık 3°C, çiğ noktası 5°C, QNH 1008, rüzgâr 12 kt.")
+    assert "temp" in no_sign["missing"] and "dew" in no_sign["missing"]
+    # uydurma sayı + eksik QNH
+    fab = ls.score_case("metar", text, "Rüzgâr 12 kt, görüş 4000 m, bulut 1700 ft, hamle 22 kt.")
+    assert 1700.0 in fab["unsupported"] and "qnh" in fab["missing"]
+
+
+def test_notam_status_polarity_and_dates_are_checked() -> None:
+    from skymind.aviation import llm_summary as ls
+
+    text = (
+        "A0123/25 NOTAMN\nQ) LTAA/QMRLC/IV/NBO/A/000/999/4059N02845E005\n"
+        "A) LTBA B) 2503151000 C) 2503161000\nE) RWY 09/27 CLSD DUE TO MAINT\nF) SFC G) UNL"
+    )
+    good = ls.score_case(
+        "notam",
+        text,
+        "LTBA, 123 numaralı NOTAM: 15.03.2025 10:00 - 16.03.2025 10:00 pist 09/27 kapalı.",
+    )
+    assert good["recall"] == 1.0 and good["semantic_error"] is False
+    bad = ls.score_case("notam", text, "LTBA, 123: 15.03 10:00 - 16.03 10:00 pist 09/27 bakımda.")
+    assert bad["semantic_error"] is True
