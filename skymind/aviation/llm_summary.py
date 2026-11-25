@@ -21,6 +21,7 @@ import json
 import random
 import re
 from collections.abc import Callable
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -104,6 +105,18 @@ def wind_direction_contradiction(m: Metar, summary: str) -> bool:
     return gold not in found
 
 
+MONTHS = ("ocak", "şubat", "mart", "nisan", "mayıs", "haziran", "temmuz", "ağustos", "eylül",
+          "ekim", "kasım", "aralık")  # fmt: skip
+
+
+def _date_present(summary: str, nums: list[float], d: datetime) -> bool:
+    """Tarih-saat özette geçiyor mu: ham YYAAGGSSdd kodu, ya da gün + saat + (ay sayısı|ay adı)."""
+    if d.strftime("%y%m%d%H%M") in summary:
+        return True
+    month = _has(nums, float(d.month)) or MONTHS[d.month - 1] in turkish_lower(summary)
+    return month and _has(nums, float(d.day)) and _has(nums, float(d.hour))
+
+
 def notam_facts(n: Notam, summary: str) -> dict[str, bool]:
     nums = numbers_in(summary)
     facts: dict[str, bool] = {"ident": _has(nums, float(n.number))}
@@ -111,7 +124,7 @@ def notam_facts(n: Notam, summary: str) -> dict[str, bool]:
         facts[f"loc:{loc}"] = loc.lower() in summary.lower()  # turkish_lower "I"->"ı" yapar
     for tag, d in (("from", n.valid_from), ("to", None if n.permanent else n.valid_to)):
         if d:
-            facts[f"{tag}_date"] = all(_has(nums, float(x)) for x in (d.day, d.month, d.hour))
+            facts[f"{tag}_date"] = _date_present(summary, nums, d)
     for i, x in enumerate(numbers_in(n.text)):
         facts[f"text_num{i}"] = _has(nums, x)
     return facts

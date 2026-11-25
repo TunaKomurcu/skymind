@@ -65,3 +65,5 @@ karşılaştırıldı; ONNX int4 gereksiz soruyu azaltıyor ama daha sık uyduru
   doğruluk 0.94, cevapsız sorularda vazgeçme 24/24; atıf geçerliliği 1.0 ama desteklenme ölçülmedi.
 * **Sıkıştırma** (niyet sınıflandırıcı): katman azaltan öğrenciler CPU'da 2.0×/3.1×/5.2× hızlı, doğruluk bu görevde
   tavana yakın (fark gürültü düzeyinde); kafa budama ≤1.3×, yapısal olmayan budama hız kazandırmaz.
+* **METAR/NOTAM özeti:** kural tabanlı özetleyici sayısal olarak sadık (yapı gereği); LLM (gemma-3 27B) 80 METAR'ın
+  %35'inde, 48 NOTAM'ın %31'inde kaynakta olmayan sayı üretti (NOTAM tarih kodunu sık yanlış okuyor); 4B daha kötü.

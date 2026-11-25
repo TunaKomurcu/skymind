@@ -416,3 +416,59 @@ Sözcüksel sorularda doğruluk 31/31, paraphrase'te 0.517 (R@3 0.62).
 ```bash
 uv run --extra train python -m skymind.rag.generate --model google/gemma-3-27b-it --n 60 --out outputs/eval/rag-gen.json
 ```
+
+## LLM ile METAR/NOTAM özeti vs kural tabanlı (Faz 5)
+`skymind/aviation/llm_summary.py`. Sentetik üreticiden 80 METAR + 48 NOTAM (tohum 21; altın yapı bilinir).
+Aynı prompt (sıfır-örnek, "yalnızca rapordaki bilgiyi kullan, sayıları aynen koru, birim çevirme"),
+sıcaklık 0, `google/gemma-3-27b-it` ve `google/gemma-3-4b-it` (OpenRouter, toplam ~0.01 USD).
+
+| Özetleyici | Rapor | Bilgi geri çağırma (ort.) | Tüm alanlar var | Uydurma sayı içeren | Anlamsal hata |
+|---|---|---|---|---|---|
+| kural tabanlı | METAR | 1.000 | 1.000 | 0.000 | 0.000 |
+| gemma-3-27b | METAR | 0.852 | 0.463 | 0.350 | 0.000 |
+| gemma-3-4b | METAR | 0.633 | 0.075 | 0.400 | 0.000 |
+| kural tabanlı | NOTAM | 1.000 | 1.000 | 0.000 | 0.000 |
+| gemma-3-27b | NOTAM | 0.739 | 0.271 | 0.312 | 0.021 |
+| gemma-3-4b | NOTAM | 0.438 | 0.021 | 0.646 | 0.167 |
+
+"Anlamsal hata": METAR'da rüzgâr yönü sözcüğünün altın dereceyle çelişmesi; NOTAM'da "kapalı / servis dışı /
+yasak" durumunun özette atlanması. Kural tabanlı özetleyici, metrikler aynı ayrıştırıcıdan türediği için
+yapı gereği 1.0 alır; bu satır yalnızca metriğin kendini doğrulamasıdır, kural tabanlının "daha iyi"
+olduğunun kanıtı değildir (özet kalitesi/okunabilirliği ölçülmedi, kural tabanlının NOTAM metni ise büyük
+ölçüde İngilizce kısaltmaları taşıyor: `ayrıntı: ... ERECTED 2NM FROM ARP`).
+
+### Gerçek LLM hataları (örneklerden)
+* **NOTAM tarih kodunu yanlış okuma** (en yaygın): `B) 2506062300` için "25 Haziran 2024 saat 23:00"
+  (YYAAGGSSdd kodunu GG=25, yıl=2024 diye yorumlamış). Başlangıç tarihi 27B'de 48 NOTAM'ın 24'ünde
+  eksik/yanlış; kaynakta olmayan "2024" yılı 19'unda geçiyor.
+* **Konum karışıklığı:** `A) LTAF` yerine Q satırındaki FIR/konu kodu (`LTAA/QMXLC`) "havaalanı" diye yazılmış
+  (15 NOTAM'da konum eksik/yanlış).
+* **METAR rakam okuma:** `01031KT` → "3 knot", `0800` → "8000 m", `OVC030` → "300 ft", `M07/M12` → eksi
+  işareti kaybolmuş ("7 ile 12 derece arasında"). 27B'de sıcaklık 15, çiğ noktası 21, bulut yüksekliği 16 raporda
+  eksik/yanlış.
+* 4B ayrıca NOTAM durumunu atlıyor (8/48 "kapalı/servis dışı" yok) ve çok daha sık sayı uyduruyor.
+
+### Okuma ve uyarılar
+1. **Metrik iki kez düzeltildi, sonuçlar görüldükten sonra.** İlk koşuda uydurma-sayı oranları 0.43/0.56
+   (27B METAR/NOTAM) çıktı; incelemede bir kısmı metriğin kusuruydu (ör. `061650Z` → "1650", `0800-1600` →
+   "08:00", yıl "25" → "2025", koordinatın derece/dakikaya bölünmesi, ham zaman kodunun parçalanması,
+   ay adıyla yazılmış tarih). Bu meşru yeniden biçimlendirmeleri türetilmiş sayıdan saydım; yukarıdaki
+   tablo düzeltilmiş metrikle. Düzeltmeler yalnızca *gevşetme* yönündeydi ama post-hoc yapıldı, bu bir
+   ayarlama riskidir; ham özetler `outputs/eval/summ-llm.json`'da (git'e girmez) denetlenebilir.
+2. **Sayı denetimi hâlâ alt sınır:** kaynakta başka yerde geçen bir sayıyla çakışan yanlış sayı yakalanmaz.
+   Gerçek hata oranı tablodan düşük olamaz, yüksek olabilir.
+3. **Ölçüler dar:** yanlış hadise/sıra, eksik uyarı ve akıcılık görülmez; "tüm alanlar var" oranı katı bir
+   ölçüdür (tek eksik alan raporu başarısız sayar). Biçim farkları (ham kod vs sözlü tarih) yalnızca belirli
+   kalıplar için hoş görülüyor.
+4. **Tek prompt, sıfır örnek, tek koşu, küçük n; prompt ayarlanmadı.** Few-shot veya ham kodları açıklayan bir
+   prompt, tarih ve rakam hatalarını büyük olasılıkla azaltır; bu denenmedi. Modeller havacılık için
+   özelleştirilmemiş genel modeller.
+5. **Sentetik üretici kusuru:** koordinat dakikaları 59'u aşabiliyor (ör. `4064N`); gerçek NOTAM'da olmaz.
+   Sonuçları etkilemez ama üretici gerçekçi değil.
+6. Pratik çıkarım: sayı ve tarih taşıyan operasyonel özetlerde LLM çıktısı **doğrulayıcısız** kullanılmamalı;
+   kural tabanlı özet güvenilir çekirdek, LLM yalnızca anlatım katmanı olabilir ve yine sayı denetiminden
+   geçirilmeli.
+
+```bash
+uv run --no-sync python -m skymind.aviation.llm_summary --models google/gemma-3-27b-it,google/gemma-3-4b-it
+```

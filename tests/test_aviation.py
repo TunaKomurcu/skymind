@@ -254,3 +254,38 @@ def test_notam_status_polarity_and_dates_are_checked() -> None:
     assert good["recall"] == 1.0 and good["semantic_error"] is False
     bad = ls.score_case("notam", text, "LTBA, 123: 15.03 10:00 - 16.03 10:00 pist 09/27 bakımda.")
     assert bad["semantic_error"] is True
+
+
+def test_faithfulness_accepts_reformatted_times_and_years_but_not_new_numbers() -> None:
+    from skymind.aviation import llm_summary as ls
+
+    text = (
+        "A0123/25 NOTAMN\nQ) LTAA/QMRLC/IV/NBO/A/000/999/4059N02845E005\n"
+        "A) LTBA B) 2503151000 C) 2503161000\nD) DAILY 0800-1600\nE) RWY 09/27 CLSD\nF) SFC G) UNL"
+    )
+    ok = (
+        "LTBA 123: 15 Mart 2025 10:00 - 16 Mart 2025 10:00, her gün 08:00-16:00, pist 09/27 kapalı."
+    )
+    r = ls.score_case("notam", text, ok)
+    assert r["unsupported"] == [] and r["recall"] == 1.0, r
+    # yanlış gün ve uydurma saat yakalanmalı
+    bad = ls.score_case(
+        "notam",
+        text,
+        "LTBA 123: 14 Mart 2025 10:00 - 16 Mart 10:00, 11:00-16:00, pist 09/27 kapalı.",
+    )
+    assert "from_date" in bad["missing"] and 11.0 in bad["unsupported"]
+
+
+def test_faithfulness_accepts_coordinate_and_stamp_splits_but_not_wrong_day() -> None:
+    from skymind.aviation import llm_summary as ls
+
+    text = (
+        "A0123/25 NOTAMN\nQ) LTAA/QWULW/IV/NBO/A/000/999/4059N02845E005\n"
+        "A) LTBA B) 2503151000 C) 2503161000\nE) UAS OPR WI 3NM RADIUS 4059N 02845E\nF) SFC G) UNL"
+    )
+    ok = "LTBA 123: 40°59'K 28°45'D çevresinde 3 NM, 250315 1000 - 250316 1000 arası."
+    assert ls.score_case("notam", text, ok)["unsupported"] == []
+    # YYAAGG yanlış okunmuş: "25 Mart" (gerçek gün 15)
+    bad = ls.score_case("notam", text, "LTBA 123: 25 Mart saat 10:00'dan 26 Mart 10:00'a kadar.")
+    assert "from_date" in bad["missing"] and 26.0 in bad["unsupported"]

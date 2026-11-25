@@ -59,5 +59,5 @@ Kısıtlar: **ücretsiz** araçlar, RTX 4060 Laptop (8 GB VRAM), 32 GB RAM, yaln
 - [x] Cümle bazlı atıf (çıkarımsal yanıtlayıcı) ve atıf doğrulama
 - [x] METAR/NOTAM ayrıştırıcı, Türkçe özet, sentetik üretici, sayısal sadakat denetimi
 - [x] Üretken (LLM) yanıtlayıcı + atıf/vazgeçme ölçümü (gemma-3-27b, OpenRouter; R@3 darboğaz, atıf geçerliliği ≠ desteklenme)
-- [ ] LLM tabanlı NOTAM/METAR özeti ve kural tabanlıyla sadakat karşılaştırması (GPU gerekir)
+- [x] LLM tabanlı NOTAM/METAR özeti (gemma-3 27B/4B) ve kural tabanlıyla sadakat karşılaştırması: LLM tarih/rakam hataları yapıyor (docs/RESULTS.md)
 - [ ] Reranker denemesi
