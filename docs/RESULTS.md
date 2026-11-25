@@ -390,7 +390,7 @@ uv run --no-sync pytest tests/test_nlp.py                                       
 |---|---|
 | Doğru parça ilk 3'te (R@3) | 0.817 |
 | Doğru cevap (60 sorunun) | 0.767 |
-| Doğru cevap | doğru parça gelmişse | **0.939** (46/49) |
+| Doğru cevap, doğru parça geldiyse | **0.939** (46/49) |
 | Yanlışlıkla "Bilgi bulunamadı" | 0.183 (11/60; 8'i parça gelmediği için) |
 | Atıf geçerliliği (var olan parça+cümle) | 1.000 |
 | Cevap verip atıfsız bırakma | 0.000 |
@@ -403,7 +403,7 @@ Sözcüksel sorularda doğruluk 31/31, paraphrase'te 0.517 (R@3 0.62).
 ### Okuma ve uyarılar
 1. **Ana darboğaz üretici değil retrieval:** doğru parça geldiğinde doğruluk %94; gelmediğinde model
    8/11 kez dürüstçe vazgeçti, 3 kez **yanlış parçadan, makul görünen yanlış cevap** verdi
-   (ör. X2 sorusuna başka modelin hata kodunu/değerini, geçerli bir atıfla).
+   (ör. sorulan duruma uymayan bir hata kodunu veya başka bir değeri, geçerli bir atıfla; başka modelin değeri olup olmadığını tek tek doğrulamadım).
 2. **Atıf geçerliliği 1.0 desteklenme anlamına gelmez.** Ölçü yalnızca atfın var olan bir parça+cümleyi
    gösterdiğini doğrular; o cümlenin cevabı gerçekten desteklediğini değil. Yukarıdaki 3 yanlış cevap
    geçerli atıf taşıyor. Desteklenme (NLI/insan) ölçülmedi.
