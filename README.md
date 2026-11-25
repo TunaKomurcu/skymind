@@ -4,8 +4,57 @@ Operatörün Türkçe komutunu doğrulanmış bir **JSON görev planına** çevi
 yerine **netleştirme sorusu** soran bir NLP/LLM araştırma prototipi. Yalnızca açık kaynak ve sentetik veri
 kullanır; gerçek operasyonel sistem iddiası yoktur.
 
-> Durum: Faz 0–7 büyük ölçüde tamam (veri, SFT, DPO, niyet/NER, RAG, METAR/NOTAM, nicemleme, damıtma/budama, C++ servis, A/B). Kalan: gerçek küme denemesi, altın set gözden geçirme, final demo. Plan ve ilerleme: [`docs/ROADMAP.md`](docs/ROADMAP.md).
+> Durum: Faz 0–7 büyük ölçüde tamam (veri, SFT, DPO, niyet/NER, RAG, METAR/NOTAM, nicemleme,
+> damıtma/budama, C++ servis, A/B, demo). Kalan: konteyner imajı derleme ve küme denemesi, altın set
+> gözden geçirme. Plan ve ilerleme: [`docs/ROADMAP.md`](docs/ROADMAP.md).
 > Kararlar: [`docs/adr/`](docs/adr/). Tüm sonuçlar ve uyarılar: [`docs/RESULTS.md`](docs/RESULTS.md).
+
+## Mimari
+
+```mermaid
+flowchart LR
+    U[Operatör komutu<br/>Türkçe] --> G[A/B gateway<br/>FastAPI]
+    G -->|SHA-256 atama| A[C++ servis<br/>llama.cpp, SFT GGUF]
+    G -->|SHA-256 atama| B[C++ servis<br/>llama.cpp, DPO GGUF]
+    A --> V{Şema doğrulama<br/>Pydantic eşi}
+    B --> V
+    V -->|geçerli| P[JSON plan / netleştirme / ret]
+    A & B & G -.->|/metrics| PR[Prometheus] -.-> GR[Grafana]
+    subgraph Çevrimdışı hat
+      D[Sentetik veri] --> S[QLoRA SFT] --> DP[DPO v2] --> Q[GGUF nicemleme]
+    end
+    Q -.-> A
+    Q -.-> B
+    R[RAG: BM25 + e5 + RRF] --> C[Atıflı yanıt]
+    M[METAR/NOTAM ayrıştırıcı] --> T[Türkçe özet + sayı denetimi]
+```
+
+Planlayıcı (Qwen2.5-1.5B, QLoRA SFT, DPO) komutu JSON plana çevirir; çıktı hem sunucuda (C++ doğrulayıcı,
+Pydantic ile eşlik testli) hem değerlendirmede şemadan geçirilir. RAG ve METAR/NOTAM hatları planlayıcıdan
+bağımsızdır.
+
+## Demo
+
+```bash
+# Windows: C++ sunucuyu başlatır, 5 komutu gönderir, METAR/NOTAM ve RAG örneklerini gösterir, sunucuyu kapatır
+.\scripts\demo.ps1
+# Model gerektirmeyen kısımlar (METAR/NOTAM, atıflı RAG):
+uv run --extra serve python -m skymind.demo --skip-planner
+```
+
+Gösterilen çıktılar gerçektir, **hatalar dahil**: örnek bir koşuda 5 komutun 2'si şema doğrulamasından geçmedi
+(`scan` adımında eksik `altitude_m`; "5 metre alçak geçiş" için sınır altı irtifa) ve biri şemadan geçip yine de
+yanlıştı ("yirmi beş m/s" için 20 m/s). Geçerli JSON doğru plan demek değildir.
+
+## Sınırlamalar (kısa)
+
+* Tüm veri sentetik; test seti dağılım içi. 300 örneklik altın küme **henüz insan tarafından gözden
+  geçirilmedi**, sonuçlar bu yüzden sentetik test kümesindedir.
+* Planlayıcı için tek eğitim tohumu; SFT/DPO farkları küçük (A/B'de anlamlı değil, p = 0.74).
+* C++ ve Python servis karşılaştırması iki yığını birden karşılaştırır (nicemleme + dil); saf dil etkisi ayrılmadı.
+* Docker/Podman imajları ve Kubernetes manifest'leri bu makinede derlenmedi/uygulanmadı; yalnızca yapısal testler var.
+* NER elle sınama seti (42 cümle) asistan tarafından yazıldı. Atıf geçerliliği ölçüsü desteklenmeyi göstermez.
+* Operasyonel güvenlik iddiası yoktur; uçuş uygunluk eşikleri prototip değerlerdir.
 
 ## Planlayıcı sonuçları (400 test örneği)
 
@@ -30,14 +79,14 @@ uv run pytest
 ## Yapı
 
 ```
-skymind/    Python paketi (schemas, data, eval, planner, optimize, serve, rag, aviation)
+skymind/    Python paketi (schemas, data, eval, planner, nlp, optimize, serve, rag, aviation, demo)
 cpp/        C++ çıkarım servisi (llama.cpp) + GoogleTest, bkz. cpp/README.md
 deploy/     A/B ağ geçidi, Prometheus/Grafana, Containerfile, compose, K8s, bkz. deploy/README.md
 tests/      pytest testleri
 docs/       yol haritası, ADR'ler, sonuçlar
 ```
 
-Mimari diyagram, sonuç tabloları ve tekrar üretme adımları fazlar ilerledikçe buraya eklenecek.
+Tüm deney komutları `docs/RESULTS.md` içindeki "Tekrar üretme" bölümlerindedir.
 
 ## Nicemleme (SFT modeli, llama.cpp, RTX 4060)
 
