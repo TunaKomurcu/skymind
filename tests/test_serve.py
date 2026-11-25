@@ -130,3 +130,33 @@ def test_loadtest_run_level_against_live_service(live_url: str) -> None:
     assert 0 < lat["p50"] <= lat["p95"] <= lat["p99"] <= lat["max"]
     # tek bağlam sıralıdır: 4 eşzamanlı istekte işçi sayısı kadar kuyruk bekleme olmalı
     assert lat["max"] >= 2 * 20  # en az iki istek süresi kadar bekleyen var
+
+
+def test_demo_planner_section_reads_the_real_service_response_shape(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    import json as _json
+
+    import httpx
+
+    from skymind import demo
+
+    svc = PlannerService(FakeEngine(), "sys")
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        status, body = svc.plan(_json.loads(request.content))
+        return httpx.Response(status, json=body)
+
+    bad = demo.show_planner("http://x", 5.0, transport=httpx.MockTransport(handler))
+    out = capsys.readouterr().out
+    assert bad == 0 and "[plan]" in out and "takeoff" in out and "7 token" in out
+    # geçersiz model çıktısı demoda saklanmaz
+    svc2 = PlannerService(FakeEngine("saçma"), "sys")
+
+    def handler2(request: httpx.Request) -> httpx.Response:
+        status, body = svc2.plan(_json.loads(request.content))
+        return httpx.Response(status, json=body)
+
+    assert demo.show_planner("http://x", 5.0, transport=httpx.MockTransport(handler2)) == len(
+        demo.COMMANDS
+    )
