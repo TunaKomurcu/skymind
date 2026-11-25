@@ -27,7 +27,8 @@ SYSTEM = (
     "Sen bir İHA bakım ve operasyon kılavuzu asistanısın. YALNIZCA verilen pasajlardaki bilgiyi "
     "kullan; kendi bilgini ekleme. Her cümlenin sonuna dayandığın pasaj cümlesini "
     "[pasaj-kimliği, cK] biçiminde yaz (örnek: [hata#3, c1]). Soru yalnızca belirli bir araç "
-    "modeli için geçerliyse başka modelin değerini verme. Cevap pasajlarda yoksa yalnızca şunu yaz: "
+    "modeli için geçerliyse başka modelin değerini verme. Cevap pasajlarda yoksa yalnızca "
+    "şunu yaz: "
     f"{ABSTAIN} Kısa ve Türkçe yanıtla."
 )
 
