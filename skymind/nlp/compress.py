@@ -1,6 +1,6 @@
 """Niyet sınıflandırıcısı için damıtma (distillation) ve budama (pruning) deneyleri.
 
-    python -m skymind.nlp.compress --teacher outputs/nlp/intent-berturk/last
+    python -m skymind.nlp.compress_run --phase acc|latency   (deney çalıştırıcısı)
 
 Damıtma: öğrenci, öğretmenin seçili katmanlarından başlatılır. Her boyut için KD'li (yumuşak hedef)
 ve KD'siz (yalnızca CE) eğitilir; böylece kazancın damıtmadan mı yoksa yalnızca katman
@@ -11,23 +11,17 @@ başına hız kazandırmaz.
 
 from __future__ import annotations
 
-import argparse
 import copy
-import json
 import random
 import re
 import statistics
 import time
-from pathlib import Path
 from typing import Any
 
 import torch
 from torch.nn import functional as F  # noqa: N812
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-from skymind.mlops.tracking import log_run
 from skymind.nlp.datasets import intent_data
-from skymind.nlp.ner_data import INTENTS
 from skymind.nlp.train import batches, pad
 
 
@@ -155,22 +149,6 @@ def nonzero_params(model: Any) -> float:
     return sum(int((p != 0).sum()) for p in model.parameters()) / 1e6
 
 
-def report(
-    model: Any, tok: Any, device: str, texts: list[str], extra: dict[str, Any]
-) -> dict[str, Any]:
-    cpu_model = copy.deepcopy(model).to("cpu")
-    res = {
-        **extra,
-        **score(model, tok, device),
-        "params_m": round(sum(p.numel() for p in model.parameters()) / 1e6, 1),
-        "nonzero_params_m": round(nonzero_params(model), 1),
-        "latency_gpu_ms": latency_ms(model, tok, device, texts) if device == "cuda" else None,
-        "latency_cpu_ms": latency_ms(cpu_model, tok, "cpu", texts),
-    }
-    print(json.dumps(res, ensure_ascii=False), flush=True)
-    return res
-
-
 # --- budama ------------------------------------------------------------------------------------
 
 
@@ -284,103 +262,3 @@ def choose_heads(imp: torch.Tensor, frac: float) -> dict[int, list[int]]:
             alive[layer] -= 1
             dropped += 1
     return by_layer
-
-
-def main() -> None:
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--teacher", default="outputs/nlp/intent-berturk/last")
-    ap.add_argument("--epochs", type=int, default=3)
-    ap.add_argument("--threads", type=int, default=4, help="CPU gecikme ölçümü iş parçacığı")
-    ap.add_argument("--out", type=Path, default=Path("outputs/nlp/compress.json"))
-    a = ap.parse_args()
-    torch.set_num_threads(a.threads)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    tok = AutoTokenizer.from_pretrained(a.teacher)
-    pad_id = tok.pad_token_id
-    x_tr, y_tr = intent_data("train")
-    train = encode(tok, x_tr, y_tr)
-    test_x, _ = intent_data("test")
-    teacher: Any = AutoModelForSequenceClassification.from_pretrained(a.teacher).to(device)
-    teacher.eval()
-    results: list[dict[str, Any]] = []
-
-    def add(r: dict[str, Any]) -> None:
-        results.append(r)  # her varyanttan sonra diske yaz: kesilirse kayıp olmasın
-        a.out.parent.mkdir(parents=True, exist_ok=True)
-        a.out.write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
-
-    add(report(teacher, tok, device, test_x, {"variant": "teacher-12L"}))
-
-    def fresh_teacher() -> Any:
-        m: Any = AutoModelForSequenceClassification.from_pretrained(a.teacher).to(device)
-        return m
-
-    # damıtma
-    for keep, name in (([0, 2, 4, 6, 8, 10], "6L"), ([0, 4, 8, 11], "4L"), ([0, 11], "2L")):
-        for use_kd in (True, False):
-            student = make_student(teacher.cpu(), keep).to(device)
-            teacher.to(device)
-            secs = fit(student, train, pad_id, device, a.epochs, 5e-5, teacher if use_kd else None)
-            add(
-                report(
-                    student,
-                    tok,
-                    device,
-                    test_x,
-                    {
-                        "variant": f"student-{name}-{'kd' if use_kd else 'ce'}",
-                        "train_s": round(secs, 1),
-                    },
-                )
-            )
-            del student
-
-    # yapısal olmayan büyüklük budaması (+ maskeli 1 epoch ince ayar)
-    for sp in (0.5, 0.8, 0.9):
-        m = fresh_teacher()
-        masks = magnitude_masks(m, sp)
-        apply_masks(m, masks)
-        add(report(m, tok, device, test_x, {"variant": f"magnitude-{int(sp * 100)}-noft"}))
-        secs = fit(m, train, pad_id, device, 1, 2e-5, masks=masks)
-        add(
-            report(
-                m,
-                tok,
-                device,
-                test_x,
-                {"variant": f"magnitude-{int(sp * 100)}-ft1", "train_s": round(secs, 1)},
-            )
-        )
-        del m
-
-    # yapısal kafa budaması (+ 1 epoch ince ayar)
-    m = fresh_teacher()
-    imp = head_importance(m, train[:2000], pad_id, device)
-    del m
-    for frac in (0.3, 0.5, 0.7):
-        m = fresh_teacher()
-        prune_heads(m, choose_heads(imp, frac))
-        results_tag = f"heads-{int(frac * 100)}"
-        add(report(m, tok, device, test_x, {"variant": f"{results_tag}-noft"}))
-        secs = fit(m, train, pad_id, device, 1, 3e-5)
-        add(
-            report(
-                m, tok, device, test_x, {"variant": f"{results_tag}-ft1", "train_s": round(secs, 1)}
-            )
-        )
-        del m
-
-    a.out.parent.mkdir(parents=True, exist_ok=True)
-    a.out.write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
-    for r in results:
-        log_run(
-            "nlp-compress",
-            r["variant"],
-            {"teacher": a.teacher, "epochs": a.epochs, "classes": len(INTENTS)},
-            {k: v for k, v in r.items() if isinstance(v, float)},
-        )
-    print(f"-> {a.out}")
-
-
-if __name__ == "__main__":
-    main()
