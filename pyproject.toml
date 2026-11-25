@@ -80,5 +80,5 @@ module = ["skymind.planner.sft", "skymind.planner.dpo"]
 ignore_errors = true
 
 [[tool.mypy.overrides]]
-module = ["onnxruntime_genai", "onnxruntime_genai.*"]
+module = ["onnxruntime_genai", "onnxruntime_genai.*", "sklearn.*"]
 ignore_missing_imports = true

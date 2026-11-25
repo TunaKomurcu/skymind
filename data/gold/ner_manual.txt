@@ -1,0 +1,47 @@
+# El yazımı mini NER sınama seti (40 cümle). Biçim: [metin|ETİKET].
+# Kurallar: birim varlığın içindedir ("[500 m|ALT]"); km/sa hızda "saatte" dahildir;
+# eklerle çekimli sözcük bütün olarak etiketlenir; COORD yalnızca sayıdır.
+# "ZOR" başlıklı bölüm şablon dışı ifadeler içerir (sayı sözcüğü, m/sn, ft, dk, bilinmeyen yer adı).
+# Yazar: proje sahibi tarafından, eğitim verisinden bağımsız ama küçük; yalnızca genelleme göstergesidir.
+## KOLAY
+Lütfen [1500 metre|ALT] irtifaya çık.
+[kuzeye|DIR] [2 km|DIST] ilerle.
+[Alfa noktasına|PLACE] git ve [200 m|ALT] irtifada bekle.
+[baraj|PLACE] bölgesini [3 km|RADIUS] yarıçapta [500 metre|ALT] yükseklikte tara.
+Hızı [15 m/s|SPEED] yap.
+[güneydoğuya|DIR] [1000 metre|DIST] git.
+[liman|PLACE] üzerinde [10 dakika|DUR] bekle, irtifa [300 m|ALT].
+[38.5|COORD] enlem [35.2|COORD] boylam noktasına git.
+[köprü|PLACE] ve [pist|PLACE] arasında [250 m|ALT] irtifada devriye at.
+Şimdi [2 kilometre|ALT] irtifaya yüksel.
+[güneye|DIR] [3 km|DIST] ilerle ve bekle.
+[piste|PLACE] in.
+[radar tepesine|PLACE] git, [400 m|ALT] irtifada.
+[depoyu|PLACE] [2000 m|RADIUS] yarıçapta [1000 m|ALT] irtifada tara.
+Hızı [10 m/s|SPEED] yap lütfen.
+[kuzeydoğuya|DIR] git.
+[baraja|PLACE] [kuzeyden|DIR] yaklaş.
+[15 dakika|DUR] [köprü|PLACE] üzerinde bekle.
+[Bravo noktasına|PLACE] [100 metre|ALT] irtifada git.
+[doğuda|DIR] [1500 m|DIST] mesafedeki noktayı [800 m|RADIUS] yarıçapla tara, irtifa [600 m|ALT].
+## ZOR
+[bin beş yüz metre|ALT] irtifaya kalk.
+[yüz elli metre|ALT] yükseklikte [hastane|PLACE] üzerinde dön.
+Hızını [saatte 72 kilometre|SPEED] yap.
+[kuzeybatıya|DIR] [500 m|DIST] git sonra [depoya|PLACE] in.
+[5 km|RADIUS] yarıçapla [orman sahasını|PLACE] tara, irtifa [1000 m|ALT].
+[Charlie noktası|PLACE] çevresinde [20 dk|DUR] daire çiz.
+[2,5 km|ALT] yükseğe çık.
+[40.12|COORD], [29.77|COORD] koordinatına uç.
+[stadyuma|PLACE] kadar git.
+Hızı [20 m/sn|SPEED] ayarla.
+[havaalanı|PLACE] üzerinde [3000 ft|ALT] irtifada bekle.
+Önce [500 m|ALT] irtifaya çık sonra [güneye|DIR] dön ve [Bravo noktasına|PLACE] ulaş.
+[yarım saat|DUR] boyunca [liman|PLACE] bölgesinde bekle.
+[750 m|ALT] irtifada [sınır karakoluna|PLACE] doğru uç.
+[Alfa|PLACE] ve [Bravo|PLACE] noktaları arasında devriye at, irtifa [300 metre|ALT].
+[batıya|DIR] [10 km|DIST] gidip [limana|PLACE] in.
+Hızı [35 m/s|SPEED] yapıp [doğu|DIR] yönünde ilerle.
+[1 saat|DUR] daire çiz [barajın|PLACE] üzerinde [1200 m|ALT] yükseklikte.
+Merkez [41.01|COORD] [28.97|COORD] olacak şekilde [4 km|RADIUS] yarıçapta tara.
+[iki bin metre|ALT] irtifada [kuzeye|DIR] [bir kilometre|DIST] git.
