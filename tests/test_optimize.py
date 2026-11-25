@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from skymind.optimize.eval_gguf import percentile, pick_rows
+from skymind.eval.sampling import percentile, pick_rows
 
 
 def test_percentile_bounds() -> None:

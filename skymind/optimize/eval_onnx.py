@@ -13,8 +13,8 @@ from pathlib import Path
 from typing import Any
 
 from skymind.eval import Example, evaluate
+from skymind.eval.sampling import percentile, pick_rows
 from skymind.mlops.tracking import log_run
-from skymind.optimize.eval_gguf import percentile, pick_rows
 from skymind.planner.infer import extract_json
 from skymind.planner.prompt import SYSTEM_SHORT, messages
 

@@ -19,7 +19,7 @@ from typing import Any
 
 import httpx
 
-from skymind.optimize.eval_gguf import percentile, pick_rows
+from skymind.eval.sampling import percentile, pick_rows
 
 
 async def run_level(

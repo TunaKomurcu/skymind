@@ -14,23 +14,14 @@ import statistics
 import subprocess
 import time
 from pathlib import Path
-from typing import Any
 
 import httpx
 
 from skymind.eval import Example, evaluate
+from skymind.eval.sampling import percentile, pick_rows
 from skymind.mlops.tracking import log_run
 from skymind.planner.infer import extract_json
-from skymind.planner.prompt import SYSTEM_SHORT, load_split, messages
-
-
-def pick_rows(path: Path, limit: int) -> list[dict[str, Any]]:
-    """planner.evaluate ile aynı deterministik, eşit aralıklı alt küme."""
-    rows = load_split(path)
-    if limit:
-        step = max(1, len(rows) // limit)
-        rows = rows[::step][:limit]
-    return rows
+from skymind.planner.prompt import SYSTEM_SHORT, messages
 
 
 def wait_ready(client: httpx.Client, base: str, proc: subprocess.Popen[bytes], secs: int) -> None:
@@ -45,11 +36,6 @@ def wait_ready(client: httpx.Client, base: str, proc: subprocess.Popen[bytes], s
             pass
         time.sleep(1)
     raise TimeoutError("llama-server hazır olmadı")
-
-
-def percentile(xs: list[float], q: float) -> float:
-    s = sorted(xs)
-    return s[min(len(s) - 1, round(q * (len(s) - 1)))]
 
 
 def main() -> None:
