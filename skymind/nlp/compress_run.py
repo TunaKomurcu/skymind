@@ -11,7 +11,8 @@
   (öğretmen + 1 epoch) vardır. Sonuçlar ``(varyant, tohum)`` bazında yazılır ve yeniden
   başlatılabilir (biten satırlar atlanır).
 * ``latency``: gecikme yalnızca mimariye bağlıdır, ağırlıklara değil; bu yüzden eğitimsiz
-  mimariler ölçülür. Her biri 3 kez ölçülüp en küçük p50 alınır (müdahaleye dayanıklı).
+  mimariler ölçülür. Varyantlar dönüşümlü turlarla (varsayılan 5) ölçülür; en küçük p50 alınır
+  (müdahaleye dayanıklı).
 """
 
 from __future__ import annotations
@@ -165,25 +166,38 @@ def latency_phase(a: argparse.Namespace) -> None:
     apply_masks(m, magnitude_masks(m, 0.8))
     variants["magnitude-80 (yoğun çekirdek)"] = m.eval()
 
+    import copy
+
+    # Sıra etkisini (ilk ölçülen model soğuk) gidermek için: genel ısınma, sonra dönüşümlü turlar
+    first = next(iter(variants.values()))
+    latency_ms(first, tok, "cpu", texts, n=60)
+    gpu_models = (
+        {k: copy.deepcopy(v).to("cuda") for k, v in variants.items()} if device == "cuda" else {}
+    )
+    if gpu_models:
+        latency_ms(gpu_models["teacher-12L"], tok, "cuda", texts, n=60)
+    cpu_runs: dict[str, list[float]] = {k: [] for k in variants}
+    gpu_runs: dict[str, list[float]] = {k: [] for k in variants}
+    for _round in range(a.rounds):
+        for name, model in variants.items():
+            cpu_runs[name].append(latency_ms(model, tok, "cpu", texts)["p50"])
+            if gpu_models:
+                gpu_runs[name].append(latency_ms(gpu_models[name], tok, "cuda", texts)["p50"])
     out: list[dict[str, Any]] = []
     for name, model in variants.items():
-        cpu = [latency_ms(model, tok, "cpu", texts)["p50"] for _ in range(3)]
-        gpu = None
-        if device == "cuda":
-            g = model.to("cuda")
-            gpu = min(latency_ms(g, tok, "cuda", texts)["p50"] for _ in range(3))
-            model.to("cpu")
-        row = {
-            "variant": name,
-            "params_m": round(sum(p.numel() for p in model.parameters()) / 1e6, 1),
-            "latency_cpu_p50_ms": min(cpu),
-            "latency_cpu_runs_ms": cpu,
-            "latency_gpu_p50_ms": gpu,
-            "cpu_threads": a.threads,
-        }
-        out.append(row)
-        _write(a.out, out)
-        print(json.dumps(row, ensure_ascii=False), flush=True)
+        out.append(
+            {
+                "variant": name,
+                "params_m": round(sum(p.numel() for p in model.parameters()) / 1e6, 1),
+                "latency_cpu_p50_ms": min(cpu_runs[name]),
+                "latency_cpu_runs_ms": cpu_runs[name],
+                "latency_gpu_p50_ms": min(gpu_runs[name]) if gpu_runs[name] else None,
+                "latency_gpu_runs_ms": gpu_runs[name],
+                "cpu_threads": a.threads,
+            }
+        )
+        print(json.dumps(out[-1], ensure_ascii=False), flush=True)
+    _write(a.out, out)
 
 
 def main() -> None:
@@ -193,6 +207,7 @@ def main() -> None:
     ap.add_argument("--seeds", type=lambda s: [int(x) for x in s.split(",")], default=[0, 1])
     ap.add_argument("--epochs", type=int, default=3)
     ap.add_argument("--threads", type=int, default=4)
+    ap.add_argument("--rounds", type=int, default=5, help="gecikme için dönüşümlü tur sayısı")
     ap.add_argument("--out", type=Path, default=None)
     a = ap.parse_args()
     a.out = a.out or Path(f"outputs/nlp/compress-{a.phase}.json")
