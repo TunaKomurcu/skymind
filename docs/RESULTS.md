@@ -221,16 +221,15 @@ Hata: iki serviste de 0. Geçerli çıktı oranı: ikisinde 0.983 (59/60).
 ## Okuma ve uyarılar
 1. **Tek istekte C++ yaklaşık 4.8× daha düşük p50 gecikme, ~5× daha yüksek token/sn verdi.** Ama bu
    **iki yığının** karşılaştırması: model formatı da farklı (Q5_K_M nicemlenmiş GGUF vs bf16). Farkın
-   ne kadarının dilden, ne kadarının nicemlemeden (bellek bant genişliği) ve HF `generate`
-   döngüsünün Python yükünden geldiği **ayrıştırılmadı**. "C++ Python'dan 5× hızlı" diye okunmamalı.
+   ne kadarının dilden geldiği ilk ölçümde ayrıştırılmamıştı; aşağıdaki "aynı GGUF ve aynı llama.cpp
+   ikilileri" bölümü bunu ölçtü: dil payı ~%6–7. "C++ Python'dan 5× hızlı" diye okunmamalı.
 2. **Eşzamanlılıkla verim artmıyor, gecikme doğrusal artıyor** (iki serviste de): tek bağlam ve
    batch=1 olduğu için beklenen davranış. Sürekli batching (vLLM benzeri) yok, bu bir sınırlama.
 3. **p99 bu örnek büyüklüğünde (n=60) neredeyse maksimuma eşit**, kararlı bir kuyruk istatistiği değil.
 4. **Ölçüm koşulları:** tek çalıştırma. Ölçüm sırasında arka planda video oynuyordu (GPU kullanımı
    %3–35 arası, uzun sürmedi) ve sunucular BelowNormal öncelikteydi. Bellek karşılaştırması
    **yapılmadı** (Python servisi için nvidia-smi toplam 3.7 GB gösterdi, C++ için ölçülmedi).
-5. Python tarafında llama-cpp-python gibi *aynı GGUF'u* Python'dan çalıştıran bir taban çizgisi
-   **yok**; saf dil farkını ölçecek karşılaştırma bu olurdu.
+5. Aynı GGUF'u Python'dan çalıştıran taban çizgisi (llama-cpp-python) sonradan eklendi, aşağıdaki bölüme bakın.
 
 ## A/B denemesi (gateway önünde SFT vs DPO v2, ikisi de GGUF Q5_K_M, aynı GPU)
 400 farklı komut, eşzamanlılık 4, 50/50 ağırlık, deterministik atama (sft: 182, dpo: 223 istek).
@@ -471,4 +470,78 @@ olduğunun kanıtı değildir (özet kalitesi/okunabilirliği ölçülmedi, kura
 
 ```bash
 uv run --no-sync python -m skymind.aviation.llm_summary --models google/gemma-3-27b-it,google/gemma-3-4b-it
+```
+
+## C++ servis vs Python servis, aynı GGUF ve aynı llama.cpp ikilileri (Faz 7 ek)
+Soru: C++'ın hız avantajının ne kadarı dilden? `skymind/serve/engines.py::LlamaCppPyEngine`: aynı
+Q5_K_M GGUF, aynı llama.cpp **ikili dosyaları** (C++ servisin kullandığı `third_party/llama-cuda`
+DLL'leri, `LLAMA_CPP_LIB_PATH` ile yüklendi), aynı ChatML istemi, açgözlü örnekleme, bağlam 2048, en çok 400
+token, her istekte KV sıfırlama; yalnızca çevre kod (HTTP, JSON, şema doğrulama, istek döngüsü) Python
+(FastAPI + llama-cpp-python bağlaması, ayrı sanal ortam). Yük testi birinci ölçümle aynı komutlar ve ayarlarla
+(düzey başına 60 istek, 5 ısınma, **veri onarımından sonraki güncel komut havuzuyla; C++ yeniden koşuldu**).
+
+| Servis | c | İstek/sn | Token/sn | p50 | p95 | p99 |
+|---|---|---|---|---|---|---|
+| C++ / llama.cpp | 1 | 3.75 | 131.3 | 277 ms | 517 ms | 526 ms |
+| | 2 | 3.70 | 129.3 | 499 ms | 812 ms | 900 ms |
+| | 4 | 3.77 | 131.8 | 1007 ms | 1389 ms | 1476 ms |
+| | 8 | 3.75 | 131.3 | 2125 ms | 2530 ms | 2590 ms |
+| Python / llama-cpp-python | 1 | 3.51 | 122.3 | 262 ms | 549 ms | 567 ms |
+| | 2 | 3.56 | 124.3 | 505 ms | 852 ms | 962 ms |
+| | 4 | 3.55 | 123.8 | 1070 ms | 1488 ms | 1564 ms |
+| | 8 | 3.50 | 122.2 | 2290 ms | 2686 ms | 2771 ms |
+
+* **Aynı çekirdek ve model olduğunda fark küçük: ~%6–7 daha düşük verim, p95'te ~%6–8 daha yüksek gecikme
+  Python'da** (c=1 p50'de Python 262 ms, C++ 277 ms; bu fark ölçüm gürültüsü sınırında, yön tutarsız).
+  Dolayısıyla ilk tablodaki ~4.8× farkın (HF bf16 vs C++ Q5_K_M) **büyük kısmı dilden değil**, HF
+  `generate` yığınından ve model/nicemleme biçiminden geliyor. Dil payı bu denemede en çok birkaç yüzde.
+* **Çıktı eşitliği (60 komut, açgözlü):** 58'i birebir aynı, 2'si farklı: biri iki servisin farklı
+  netleştirme sorusu metni üretmesi, biri `radius_m` (C++) ve `altitude_m` (Python) alan adı (C++'ınki şemadan
+  geçmiyor). Aynı ağırlık ve aynı ikili olsa da küçük sayısal farklar nadiren ayrışmaya yol açıyor; bu yüzden
+  C++ koşusunda geçerlilik 0.983 (59/60), Python'da 1.0: **tek örnek, sistematik fark değil**.
+* **Bellek (GPU, toplam kullanımın arka plana göre artışı):** C++ ~1533 MiB, Python ~1557 MiB (+24 MiB):
+  aynı. C++ işlem çalışma kümesi ~1.5 GB (model dosyası eşlemesi dahil). **Python işleminin ana bellek
+  ölçümü geçersiz** (venv başlatıcı süreci ölçüldü, 5 MiB gösterdi); bu sütun raporlanmıyor. HF bf16 servisi için
+  önceki tek ölçüm (nvidia-smi toplam ~3.7 GB) yeni koşuyla karşılaştırılabilir değil.
+* **Koşullar:** tek koşu, arka planda video akışı vardı, sunucular BelowNormal. C++ ve Python aynı anda değil
+  sırayla ölçüldü. **İlk tablonun (HF vs C++) komut havuzu veri onarımından önceki havuzdu**; yeniden koşulan
+  C++ (burada) ve eski C++ koşusu birbirine yakın (c=1: 277 ms vs 258 ms), ama HF ölçümü güncel havuzla
+  tekrarlanmadı.
+* Teknik not: llama-cpp-python'un hazır CUDA tekerleği bu CPU'da `0xc000001d` (geçersiz komut) ile çöküyor
+  (CPU arka ucu uyumsuz komut setiyle derlenmiş); bu yüzden C++ servisin dinamik arka uçlu DLL'leri
+  `ggml_backend_load_all_from_path` ile yüklendi. Tekerleğin kendi DLL'leri ölçümde kullanılmadı.
+
+```bash
+# Python (ayrı venv: llama-cpp-python), C++ DLL'leriyle
+set LLAMA_CPP_LIB_PATH=third_party\llama-cuda
+python -m skymind.serve.app --engine llamacpp --model outputs\gguf\skymind-sft-Q5_K_M.gguf --port 8094 --system cpp\configs\system_short.txt
+python -m skymind.serve.loadtest --url http://127.0.0.1:8094 --name py-llamacpp-gpu-r2 --levels 1,2,4,8 --requests 60
+python -m skymind.serve.parity --a http://127.0.0.1:8091 --b http://127.0.0.1:8094 --first 60
+```
+
+## LLM özeti: sıfır-örnek vs few-shot (yeni tohum 22, Faz 5 ek)
+Önceki hatalara bakarak few-shot prompt yazdığım için aynı vakalarda değerlendirmek haksız olurdu; bu yüzden
+**yeni tohumla (22) üretilmiş 80 METAR + 48 NOTAM** üzerinde iki prompt karşılaştırıldı (aynı metrik, aynı
+modeller). Few-shot prompt: okuma kuralları (METAR rüzgâr/görüş/bulut/`M` eksi çözümü, NOTAM `A)`=havaalanı,
+`B)/C)`=YYAAGGSSdd, Q satırı FIR) + 2 elle yazılmış örnek (değerlendirme vakalarıyla çakışmaz, testle doğrulandı).
+
+| Model / prompt | METAR geri çağırma | METAR tüm alanlar | METAR uydurma sayı | NOTAM geri çağırma | NOTAM tüm alanlar | NOTAM uydurma sayı |
+|---|---|---|---|---|---|---|
+| 27B sıfır-örnek | 0.856 | 0.475 | 0.200 | 0.624 | 0.104 | 0.333 |
+| **27B few-shot** | **0.968** | **0.850** | 0.188 | **0.979** | **0.917** | **0.042** |
+| 4B sıfır-örnek | 0.657 | 0.087 | 0.537 | 0.493 | 0.021 | 0.604 |
+| 4B few-shot | 0.899 | 0.525 | 0.412 | 0.880 | 0.521 | 0.062 |
+
+* **NOTAM'da few-shot büyük fark yarattı** (27B: tarih/konum hataları neredeyse bitti, uydurma sayı %33 → %4).
+  Bunlar format-bilgisi hatalarıydı; kısa bir açıklama ve iki örnek yetti.
+* **METAR'da uydurma sayı neredeyse değişmedi (0.20 → 0.19):** kalan hatalar rakam okuma: `BKN002` → "2000 ft"
+  (200 ft olmalı), `05033KT` → "3 kt", `M`/eksi işareti. Bu hatalar bir açıklamayla gitmiyor; sayı denetimi
+  (faithfulness) bu yüzden hâlâ gerekli. 4B few-shot ile bile %41 oranında sayı uyduruyor.
+* **Kural tabanlı özetleyici hâlâ tek sıfır-hatalı seçenek**, ama bu yapısal (metriklerle aynı ayrıştırıcı),
+  özet kalitesi ve okunabilirliği ölçülmedi. Few-shot prompt kısaltma da getirdi (27B: ort. 268 → 186 karakter).
+* Sınırlar: tek prompt varyantı, tek koşu, n=80/48, sıcaklık 0, iki Gemma modeli; prompt hata örneklerine bakarak
+  yazıldı (yeni tohumla kısmen dengelendi ama aynı üretici dağılımı). Ham özetler `outputs/eval/summ-llm-seed22.json`.
+
+```bash
+uv run --no-sync python -m skymind.aviation.llm_summary --seed 22 --prompts zeroshot,fewshot --out outputs/eval/summ-llm-seed22.json
 ```

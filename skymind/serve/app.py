@@ -47,10 +47,13 @@ def create_app(service: PlannerService) -> FastAPI:
 def main() -> None:
     import uvicorn
 
-    from skymind.serve.engines import HFEngine
+    from skymind.serve.engines import Engine, HFEngine, LlamaCppPyEngine
 
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--model", required=True, help="birleştirilmiş HF modeli dizini")
+    ap.add_argument(
+        "--model", required=True, help="HF model dizini (hf) ya da .gguf dosyası (llamacpp)"
+    )
+    ap.add_argument("--engine", choices=["hf", "llamacpp"], default="hf")
     ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--port", type=int, default=8092)
     ap.add_argument("--device", default="cuda")
@@ -59,7 +62,11 @@ def main() -> None:
     a = ap.parse_args()
 
     system = a.system.read_text(encoding="utf-8").rstrip("\n") if a.system else SYSTEM_SHORT
-    engine = HFEngine(a.model, max_new_tokens=a.max_new_tokens, device=a.device)
+    engine: Engine = (
+        LlamaCppPyEngine(a.model, max_new_tokens=a.max_new_tokens)
+        if a.engine == "llamacpp"
+        else HFEngine(a.model, max_new_tokens=a.max_new_tokens, device=a.device)
+    )
     app = create_app(PlannerService(engine, system))
     uvicorn.run(app, host=a.host, port=a.port, log_level="warning")
 

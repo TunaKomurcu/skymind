@@ -43,6 +43,32 @@ SYSTEM = (
     "bir özete çevir. YALNIZCA rapordaki bilgiyi kullan; sayıları aynen koru, birim çevirme, "
     "kendi yorumunu veya tahminini ekleme. Raporda bulunan hiçbir değeri atlama."
 )
+FEWSHOT_SYSTEM = (
+    SYSTEM + "\n\nOkuma kuralları:\n"
+    "METAR: rüzgâr 'ddd ss KT' = ilk 3 hane derece yönü, son 2 hane knot hızı (22012G22KT: 220°, 12 kt, "  # noqa: E501
+    "hamle 22 kt); görüş 4 hane metre (0800 = 800 m, 9999 = 10 km ve üzeri); bulut 'FEW/SCT/BKN/OVC' + "  # noqa: E501
+    "3 hane yüz fit (030 = 3000 ft, 008 = 800 ft); 'M' eksi demektir (M07/M12 = -7°C / -12°C); "
+    "Q1008 = QNH 1008 hPa; 'ggssddZ' = ayın günü, saat, dakika (UTC).\n"
+    "NOTAM: ilk satır numara; 'A)' havaalanı ICAO kodudur (Q satırındaki ilk kod FIR'dır, havaalanı DEĞİL); "  # noqa: E501
+    "'B)' başlangıç, 'C)' bitiş = YYAAGGSSdd UTC (2503151000 = 15.03.2025 10:00); 'D)' saat programı; "  # noqa: E501
+    "'E)' metin; 'F)/G)' alt/üst irtifa. CLSD = kapalı, U/S = servis dışı.\n"
+    "Tarihleri gg.aa.yyyy ss:dd UTC biçiminde yaz; tüm sayıları ve ICAO kodlarını koru."
+)
+FEWSHOT_EXAMPLES = [
+    (
+        "METAR",
+        "METAR LTAC 151320Z 31008KT 9999 SCT040 M02/M06 Q1021",
+        "LTAC, ayın 15'i 13:20 UTC: rüzgâr 310° yönünden 8 kt; görüş 10 km veya üzeri; 4000 ft'te "
+        "az bulutlu (SCT); sıcaklık -2°C, çiğ noktası -6°C; QNH 1021 hPa.",
+    ),
+    (
+        "NOTAM",
+        "B0457/25 NOTAMN\nQ) LTAA/QMRLC/IV/NBO/A/000/999/3930N03230E005\nA) LTAC B) 2509020600 "
+        "C) 2509041800\nE) RWY 03/21 CLSD DUE TO MAINT\nF) SFC G) UNL",
+        "NOTAM B0457/25 (yeni), havaalanı LTAC: 02.09.2025 06:00 – 04.09.2025 18:00 UTC arasında pist "  # noqa: E501
+        "03/21 bakım nedeniyle kapalı. İrtifa: yüzey – sınırsız.",
+    ),
+]
 _CARD_RE = re.compile(r"(kuzeydoğu|kuzeybatı|güneydoğu|güneybatı|kuzey|güney|doğu|batı)")
 STATUS = {  # NOTAM metin kalıbı -> özette beklenen kök(ler)
     "CLSD": ("kapal",),
@@ -201,8 +227,25 @@ def rule_based(kind: str, text: str) -> str:
     return metar_summary(parse_metar(text)) if kind == "metar" else notam_summary(parse_notam(text))
 
 
+def build_messages(kind: str, text: str, prompt: str = "zeroshot") -> list[dict[str, str]]:
+    label = "METAR" if kind == "metar" else "NOTAM"
+    user = f"{label} raporu:\n{text}\n\nÖzet:"
+    if prompt == "zeroshot":
+        return [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}]
+    if prompt != "fewshot":
+        raise ValueError(f"bilinmeyen prompt: {prompt}")
+    msgs = [{"role": "system", "content": FEWSHOT_SYSTEM}]
+    for lab, src, out in FEWSHOT_EXAMPLES:
+        msgs += [
+            {"role": "user", "content": f"{lab} raporu:\n{src}\n\nÖzet:"},
+            {"role": "assistant", "content": out},
+        ]
+    return msgs + [{"role": "user", "content": user}]
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--prompts", default="zeroshot", help="virgülle: zeroshot,fewshot")
     ap.add_argument("--models", default="google/gemma-3-27b-it,google/gemma-3-4b-it")
     ap.add_argument("--n-metar", type=int, default=80)
     ap.add_argument("--n-notam", type=int, default=48)
@@ -218,17 +261,14 @@ def main() -> None:
     rows, summ = run(cases, rule_based)
     result["rule-based"] = {"summary": summ, "rows": rows}
     for model in a.models.split(","):
+        for prompt in a.prompts.split(","):
 
-        def ask(kind: str, text: str, model: str = model) -> str:
-            label = "METAR" if kind == "metar" else "NOTAM"
-            msgs = [
-                {"role": "system", "content": SYSTEM},
-                {"role": "user", "content": f"{label} raporu:\n{text}\n\nÖzet:"},
-            ]
-            return client.chat(model, msgs, max_tokens=300, temperature=0.0).text.strip()
+            def ask(kind: str, text: str, model: str = model, prompt: str = prompt) -> str:
+                msgs = build_messages(kind, text, prompt)
+                return client.chat(model, msgs, max_tokens=300, temperature=0.0).text.strip()
 
-        rows, summ = run(cases, ask)
-        result[model] = {"summary": summ, "rows": rows}
+            rows, summ = run(cases, ask)
+            result[f"{model}|{prompt}"] = {"summary": summ, "rows": rows}
     for name, v in result.items():
         print(name, json.dumps(v["summary"], ensure_ascii=False))
     result["spent_usd_total"] = round(client.ledger.spent(), 4)

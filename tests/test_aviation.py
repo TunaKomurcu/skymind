@@ -289,3 +289,21 @@ def test_faithfulness_accepts_coordinate_and_stamp_splits_but_not_wrong_day() ->
     # YYAAGG yanlış okunmuş: "25 Mart" (gerçek gün 15)
     bad = ls.score_case("notam", text, "LTBA 123: 25 Mart saat 10:00'dan 26 Mart 10:00'a kadar.")
     assert "from_date" in bad["missing"] and 26.0 in bad["unsupported"]
+
+
+def test_fewshot_prompt_structure_and_examples_pass_their_own_metric() -> None:
+    from skymind.aviation import llm_summary as ls
+
+    msgs = ls.build_messages("metar", "METAR LTBA 261050Z 22012KT 9999 NSC 08/06 Q1008", "fewshot")
+    roles = [m["role"] for m in msgs]
+    assert roles == ["system", "user", "assistant", "user", "assistant", "user"]
+    assert msgs[-1]["content"].startswith("METAR raporu:\nMETAR LTBA")
+    assert [m["role"] for m in ls.build_messages("notam", "x")] == ["system", "user"]
+    with pytest.raises(ValueError):
+        ls.build_messages("metar", "x", "bilinmeyen")
+    # örnekler kendi ölçütünden temiz geçmeli ve değerlendirme vakalarıyla çakışmamalı
+    cases = {c["text"] for c in ls.build_cases(80, 48, seed=21) + ls.build_cases(80, 48, seed=22)}
+    for lab, src, out in ls.FEWSHOT_EXAMPLES:
+        r = ls.score_case(lab.lower(), src, out)
+        assert r["recall"] == 1.0 and not r["unsupported"] and not r["semantic_error"], r
+        assert src not in cases

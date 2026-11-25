@@ -160,3 +160,24 @@ def test_demo_planner_section_reads_the_real_service_response_shape(
     assert demo.show_planner("http://x", 5.0, transport=httpx.MockTransport(handler2)) == len(
         demo.COMMANDS
     )
+
+
+def test_parity_compares_raw_outputs_and_reports_differences() -> None:
+    import httpx
+
+    from skymind.serve import parity
+
+    def make(text: str) -> httpx.Client:
+        svc = PlannerService(FakeEngine(text), "sys")
+        import json as _json
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            status, body = svc.plan(_json.loads(request.content))
+            return httpx.Response(status, json=body)
+
+        return httpx.Client(base_url="http://x", transport=httpx.MockTransport(handler))
+
+    same, diffs = parity.compare(make(PLAN), make(PLAN), ["a", "b", "c"])
+    assert same == 3 and diffs == []
+    same, diffs = parity.compare(make(PLAN), make("saçma"), ["a", "b"])
+    assert same == 0 and len(diffs) == 2 and diffs[0]["a_valid"] and not diffs[0]["b_valid"]

@@ -79,3 +79,56 @@ class HFEngine:
             decode_ms=(t1 - t0 - first) * 1000,
             truncated=n_new >= self.max_new_tokens,
         )
+
+
+class LlamaCppPyEngine:
+    """llama-cpp-python (aynı llama.cpp çekirdeği, Python bağlaması): C++ servisle aynı GGUF.
+
+    Dili ayrıştırmak için: aynı model dosyası, aynı ChatML istemi, açgözlü örnekleme, bağlam 2048,
+    en fazla 400 token ve her istekte sıfırlanan KV önbelleği; yalnızca çevre kod (HTTP, JSON,
+    istek döngüsü) Python. Hazırlama/çözme süreleri ayrı ölçülmez (``prefill_ms``/``decode_ms`` 0).
+    """
+
+    def __init__(
+        self, gguf_path: str, max_new_tokens: int = 400, n_ctx: int = 2048, n_gpu_layers: int = -1
+    ) -> None:
+        import ctypes
+        import os
+
+        from llama_cpp import Llama
+
+        # LLAMA_CPP_LIB_PATH (llama-cpp-python'un kendi değişkeni) başka bir derlemeyi gösteriyorsa
+        # (ör. C++ servisin kullandığı dinamik arka uçlu DLL'ler) arka uçları elle yüklemek gerekir.
+        lib_dir = os.environ.get("LLAMA_CPP_LIB_PATH")
+        if lib_dir and hasattr(os, "add_dll_directory"):
+            os.add_dll_directory(lib_dir)
+            ctypes.CDLL(str(Path(lib_dir) / "ggml.dll")).ggml_backend_load_all_from_path(
+                lib_dir.encode()
+            )
+        self.max_new_tokens = max_new_tokens
+        self.name = f"llama-cpp-python:{Path(gguf_path).name}"
+        self.llm: Any = Llama(
+            model_path=gguf_path,
+            n_ctx=n_ctx,
+            n_batch=n_ctx,
+            n_gpu_layers=n_gpu_layers,
+            logits_all=False,
+            verbose=False,
+        )
+
+    def generate(self, system: str, command: str) -> GenerationResult:
+        prompt = (
+            f"<|im_start|>system\n{system}<|im_end|>\n<|im_start|>user\n{command}<|im_end|>\n"
+            "<|im_start|>assistant\n"
+        )
+        self.llm.reset()  # istekler bağımsız (C++ ile aynı)
+        out = self.llm.create_completion(
+            prompt, max_tokens=self.max_new_tokens, temperature=0.0, top_k=1, echo=False
+        )
+        usage = out["usage"]
+        return GenerationResult(
+            text=out["choices"][0]["text"].strip(),
+            prompt_tokens=int(usage["prompt_tokens"]),
+            new_tokens=int(usage["completion_tokens"]),
+            truncated=out["choices"][0]["finish_reason"] == "length",
+        )
