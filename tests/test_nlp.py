@@ -121,3 +121,46 @@ def test_manual_set_parses_and_covers_every_entity_type() -> None:
     assert types == {"ALT", "RADIUS", "DIST", "SPEED", "DUR", "COORD", "PLACE", "DIR"}
     for ws, ts in sets.values():
         assert all(len(w) == len(t) for w, t in zip(ws, ts, strict=True))
+
+
+def test_prune_heads_equals_zeroing_those_heads_in_the_original() -> None:
+    """Budanan model, bırakılan kafaları sıfırlanmış orijinalle aynı çıktıyı vermeli."""
+    torch = pytest.importorskip("torch")
+    transformers = pytest.importorskip("transformers")
+    from skymind.nlp.compress import choose_heads, prune_heads
+
+    cfg = transformers.BertConfig(
+        vocab_size=50,
+        hidden_size=32,
+        num_hidden_layers=3,
+        num_attention_heads=4,
+        intermediate_size=64,
+        max_position_embeddings=32,
+        num_labels=3,
+    )
+    torch.manual_seed(0)
+    base = transformers.BertForSequenceClassification(cfg).eval()
+    import copy
+
+    pruned = copy.deepcopy(base)
+    imp = torch.rand(3, 4)
+    drop = choose_heads(imp, 0.5)
+    assert sum(len(v) for v in drop.values()) == 6
+    assert all(len(v) <= 3 for v in drop.values())  # her katmanda >= 1 kafa kalır
+    prune_heads(pruned, drop)
+
+    d = cfg.hidden_size // cfg.num_attention_heads
+    with torch.no_grad():
+        for li, heads in drop.items():
+            v = base.bert.encoder.layer[li].attention.self.value
+            for h in heads:
+                v.weight[h * d : (h + 1) * d] = 0
+                v.bias[h * d : (h + 1) * d] = 0
+    ids = torch.randint(1, 50, (2, 9))
+    with torch.no_grad():
+        a, b = base(input_ids=ids).logits, pruned(input_ids=ids).logits
+    assert torch.allclose(a, b, atol=1e-5)
+    n_base = sum(p.numel() for p in base.parameters())
+    assert sum(p.numel() for p in pruned.parameters()) < n_base
+    with pytest.raises(ValueError):
+        prune_heads(copy.deepcopy(base), {0: [0, 1, 2, 3]})
