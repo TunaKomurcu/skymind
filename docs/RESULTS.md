@@ -545,3 +545,43 @@ modeller). Few-shot prompt: okuma kuralları (METAR rüzgâr/görüş/bulut/`M` 
 ```bash
 uv run --no-sync python -m skymind.aviation.llm_summary --seed 22 --prompts zeroshot,fewshot --out outputs/eval/summ-llm-seed22.json
 ```
+
+# Gold (insan doğrulamalı) alt kümede planlayıcı değerlendirmesi (Faz 3–4 ek)
+`data/gold/gold.jsonl`: 300 örnek (plan 176, netleştirme 85, ret 39), test bölümünden yalnızca şablon üretimli
+komutlar, proje sahibi tarafından 300/300 incelendi (veri kartı: `data/gold/README.md`). Eğitimle çakışma 0
+(kimlik, komut metni, şablon grubu kontrol edildi). SFT (`sft-v1`) ve DPO v2 (`dpo-v2`, SFT üstüne), HF bf16, açgözlü
+örnekleme, kısa sistem istemi. **Aynı 300 örnek, eşleşmiş karşılaştırma** (örnekleri yeniden örnekleyen bootstrap
+%95 güven aralığı ve ayrışan çiftler üzerinde kesin McNemar).
+
+| Ölçü | SFT | DPO v2 | Fark (DPO − SFT) [%95 GA] | Eşleşmiş test |
+|---|---|---|---|---|
+| Geçerli JSON | **0.983** | 0.953 | −0.030 [−0.053, −0.007] | McNemar p = 0.022 (SFT daha iyi: 11'e 2 örnek) |
+| Tür doğruluğu | 0.903 | 0.907 | +0.003 [−0.027, +0.033] | p = 1.0 |
+| Alan doğruluğu (plan) | 0.857 | 0.880 | +0.024 [−0.018, +0.069] | GA 0'ı içeriyor |
+| Gereksiz soru ↓ (plan örnekleri) | 0.131 | **0.068** | −0.062 [−0.099, −0.029] | p = 0.001 (DPO daha iyi: 11'e 0 örnek) |
+| Uydurma ↓ (netleştirme/ret örnekleri) | 0.000 | 0.000 | 0 | n = 124 |
+
+Kategori bazında tür doğruluğu (SFT / DPO): plan 0.858 / 0.881, netleştirme **0.988 / 0.918**, ret 0.923 / **1.000**.
+Hata dökümü: SFT 23 gereksiz soru (plan yerine soru) + 5 şema-geçersiz + 1 yanlış ret; DPO 12 gereksiz soru +
+**14 şema-geçersiz** + 2 yanlış tür (netleştirme yerine başka).
+
+## Okuma ve uyarılar
+1. **Bulgu önceki ölçümle aynı yönde:** DPO v2 gereksiz soruyu yaklaşık yarıya indiriyor (23 → 12 / 176 plan örneği),
+   karşılığında şemadan geçmeyen çıktı artıyor (5 → 14 / 300) ve netleştirme kategorisinde tür doğruluğu düşüyor
+   (0.988 → 0.918). Alan doğruluğundaki +0.024 güven aralığı sıfırı içerdiği için **kanıtlanmış bir üstünlük değil**.
+2. **Çoklu karşılaştırma:** 5 ölçü sınandı, düzeltme yapılmadı. Geçerlilik farkı (p = 0.022) Bonferroni
+   eşiğinde (0.01) anlamlı kalmaz; gereksiz-soru farkı (p = 0.001) kalır.
+3. **Bu küme test bölümünden daha kolay:** yalnızca şablon komutlar, paraphrase yok. Uydurma oranı burada 0.000, test
+   bölümünde (400) SFT 0.016, DPO 0.011 idi; sayılar doğrudan karşılaştırılmamalı. Alan doğruluğu gold'da 0.857 / 0.880,
+   test'te 0.842 / 0.850.
+4. **Yeni bir genelleme kanıtı değil:** gold, test bölümünün alt kümesi ve aynı şablon üreticisinden. İnsan doğrulaması
+   etiket hatası olasılığını azaltır (olsaydı iki modeli de aynı etkilerdi); dağılım kayması ölçmez.
+5. **Tek eğitim tohumu** (SFT ve DPO): fark, bu iki eğitilmiş modelin farkıdır, yöntemlerin genel farkı değil.
+6. **Gri alanlar** (veri kartındaki 23 kart: "havada kal"+yer yok, ret önceliği, "geri dön", yön-var-mesafe-yok):
+   etiket hatası değil şablon varsayımı; modellerin bu kartlardaki davranışı ayrıca analiz edilmedi.
+7. Değerlendirme HF bf16 üzerinde; Q5_K_M GGUF servisinde sayılar küçük farklarla değişebilir (önceki GGUF ölçümü ~aynı).
+
+```bash
+uv run --extra train python -m skymind.planner.evaluate --name sft-v1-gold --adapter outputs/sft-v1/adapter --data data/gold/gold.jsonl --limit 0
+uv run --extra train python -m skymind.planner.evaluate --name dpo-v2-gold --adapter outputs/dpo-v2/adapter --base-adapter outputs/sft-v1/adapter --data data/gold/gold.jsonl --limit 0
+```

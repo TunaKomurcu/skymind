@@ -48,8 +48,9 @@ yanlıştı ("yirmi beş m/s" için 20 m/s). Geçerli JSON doğru plan demek de�
 
 ## Sınırlamalar (kısa)
 
-* Tüm veri sentetik; test seti dağılım içi. 300 örneklik altın küme **henüz insan tarafından gözden
-  geçirilmedi**, sonuçlar bu yüzden sentetik test kümesindedir.
+* Tüm veri sentetik; test seti dağılım içi. 300 örneklik altın küme proje sahibi tarafından **insan doğrulamasından
+  geçti (300/300)** ama bağımsız değil: aynı şablon üreticisinden, test bölümünün şablon alt kümesi. 23 kart gri alan
+  (şablon varsayımı, etiket hatası değil), bkz. `data/gold/README.md`.
 * Planlayıcı için tek eğitim tohumu; SFT/DPO farkları küçük (A/B'de anlamlı değil, p = 0.74).
 * C++ vs HF servis farkı (~4.8×) iki yığını birden karşılaştırır; aynı GGUF ve aynı llama.cpp ikilileriyle ölçülen saf
   dil payı ~%6–7'dir. Python servisinin ana bellek (RAM) ölçümü geçersiz çıktı, raporlanmıyor.
@@ -70,6 +71,10 @@ yanlıştı ("yirmi beş m/s" için 20 m/s). Geçerli JSON doğru plan demek de�
 SFT dağıtım adayı. Saf DPO şemayı bozdu, SFT kaybı eklenen v2 yapıyı korudu ama geçerlilikte SFT'nin
 gerisinde kaldı. Test seti sentetik/dağılım içi, fark küçük örneklemde: ayrıntı ve uyarılar
 [`docs/RESULTS.md`](docs/RESULTS.md)'de.
+
+**İnsan doğrulamalı gold alt kümede (n = 300, eşleşmiş karşılaştırma):** DPO v2 gereksiz soruyu yarıya indirdi
+(%13,1 → %6,8, McNemar p = 0,001) ama şemadan geçen çıktı azaldı (%98,3 → %95,3, p = 0,022, çoklu karşılaştırma
+düzeltmesiyle sınırda); alan doğruluğu farkı (+2,4 puan) güven aralığı sıfırı içerdiği için kanıtlanmadı. Tek eğitim tohumu.
 
 ## Hızlı başlangıç
 

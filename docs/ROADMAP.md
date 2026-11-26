@@ -20,7 +20,7 @@ Kısıtlar: **ücretsiz** araçlar, RTX 4060 Laptop (8 GB VRAM), 32 GB RAM, yaln
 - [x] Eval metrikleri (JSON geçerlilik, alan doğruluğu, halüsinasyon)
 - [x] MLflow yerel kurulum + `log_run` yardımcısı
 - [x] Sentetik veri hattı (şablon + paraphrase + doğrulama + sızıntısız split)
-- [~] Altın test seti: 300 aday üretildi (data/gold), elle gözden geçirme bekliyor
+- [x] Altın test seti: 300 aday insan tarafından incelendi (300/300 doğru, 23 gri alan kartı belgeli); SFT/DPO gold üzerinde ölçüldü. Bağımsız değil: aynı şablon üreticisi (data/gold/README.md)
 - [x] ADR-001 (model ve araç seçimleri)
 
 ## Sprint 2 (Faz 3–4)
