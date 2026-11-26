@@ -3,6 +3,20 @@
 Amaç: 300 şablon-üretimli aday komutu insan gözüyle doğrulayıp `data/gold/gold.jsonl` üretmek. Bu olmadan
 planlayıcı sonuçları yalnızca sentetik test kümesinde kalır (sentetik veri ve aynı üretici dağılımı).
 
+## Claude ön-incelemesi ve kökeni (raporda belirtilecek)
+`data/gold/claude_review.jsonl`: Claude 300 adayın **tamamını elle okudu** (komut + çıktı), hata bulmadı; 15 kartı
+"tartışmalı" (sarı çerçeve, `T` tuşuyla atlanır), 3 kartı notla işaretledi. Arayüz bunu kartın altında gösterir.
+Bu dosya **insan kararından ayrıdır**; `gold_reviewed.jsonl` yalnızca senin kararlarını içerir.
+
+Dürüstlük notları (rapora girer):
+* **Bağımsızlık sınırlı:** ön-inceleyen Claude, şablonları ve altın çıktıları üreten sistemle aynı soydan; ortak bir
+  kör nokta olabilir. "Hepsi doğru" bulgusu bu yüzden **zayıf kanıttır**, gerçek değer insan gözünden gelir.
+* **Otomasyon yanlılığı:** Claude'un "✓ doğru" kutusunu görünce körlemesine Enter'a basmak kolaydır. Önce komuta ve
+  çıktıya bak, kutuya sonra. İlk 25 kartı Claude'un görüşünü görmeden kendin işaretledin (bağımsız): Claude ile
+  25/25 uyum.
+* Raporda şu şekilde yazılır: "300 adayın tamamı Claude tarafından ön-incelendi; insan (proje sahibi) bu ön-incelemeyi
+  görerek N adayı doğruladı". N = senin incelediğin adet.
+
 ## Hızlı yol: web arayüzü (önerilen, ~10 sn/aday)
 
 ```bat

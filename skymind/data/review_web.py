@@ -38,13 +38,24 @@ class ReviewState:
         self.by_id = {c["id"]: c for c in self.items}
         self.path = decisions_path
         self.decisions = load_decisions(decisions_path)
+        # isteğe bağlı Claude ön-incelemesi (insan kararından ayrı dosya, yalnızca gösterim için)
+        claude_path = src.with_name("claude_review.jsonl")
+        self.claude: dict[str, dict[str, Any]] = load_decisions(claude_path)  # satır -> id eşlemesi
         self._lock = threading.Lock()
+
+    def _claude_view(self, cid: str) -> dict[str, Any] | None:
+        r = self.claude.get(cid)
+        if r is None:
+            return None
+        return {"verdict": r["verdict"], "flag": bool(r.get("flag")), "note": r.get("note", "")}
 
     def snapshot(self) -> dict[str, Any]:
         with self._lock:
             return {
                 "items": [
-                    {k: c[k] for k in ("id", "command", "gold", "category")} for c in self.items
+                    {k: c[k] for k in ("id", "command", "gold", "category")}
+                    | {"claude": self._claude_view(c["id"])}
+                    for c in self.items
                 ],
                 "decisions": {
                     i: {

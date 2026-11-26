@@ -78,6 +78,11 @@
   details.bulk button.danger { margin-top: 8px; font-size: 13px; padding: 8px 12px; background: var(--bad-bg);
     color: var(--bad); border: 1px solid var(--bad); border-radius: 8px; font-weight: 600; }
   .card + .card { margin-top: 12px; }
+  .cell.flag { box-shadow: 0 0 0 2px #e0a100; }
+  .claude { margin-top: 14px; padding: 8px 12px; border-radius: 8px; font-size: 14px; background: var(--bg);
+            border: 1px solid var(--line); color: var(--muted); }
+  .claude.flag { border-color: #e0a100; background: #fff6dc; color: #6b4a00; }
+  @media (prefers-color-scheme: dark) { .claude.flag { background: #3a2f0d; color: #ffd36b; } }
 </style>
 </head>
 <body>
@@ -90,7 +95,7 @@
   <div id="app"></div>
   <div class="help">
     <kbd>D</kbd>/<kbd>Enter</kbd> doğru &nbsp; <kbd>N</kbd> hatalı &nbsp; <kbd>←</kbd> önceki &nbsp; <kbd>→</kbd> sonraki &nbsp;
-    <kbd>Z</kbd> geri al &nbsp; <kbd>E</kbd> komutu düzelt &nbsp; <kbd>1</kbd>–<kbd>5</kbd> hatalı nedeni &nbsp; <kbd>J</kbd> ham JSON
+    <kbd>Z</kbd> geri al &nbsp; <kbd>E</kbd> komutu düzelt &nbsp; <kbd>1</kbd>–<kbd>5</kbd> hatalı nedeni &nbsp; <kbd>T</kbd> tartışmalı kart &nbsp; <kbd>J</kbd> ham JSON
   </div>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -174,7 +179,7 @@ function setReason(k) {
 function mapHtml() {
   return `<div class="map">` + items.map((c, i) => {
     const d = decisions[c.id], cls = !d ? "todo" : d.status === "bad" ? "bad" : "ok";
-    return `<i class="cell ${cls}${i === pos ? " cur" : ""}" title="${i + 1}. ${esc(c.command.slice(0, 50))}" onclick="go(${i})"></i>`;
+    return `<i class="cell ${cls}${i === pos ? " cur" : ""}${c.claude && c.claude.flag ? " flag" : ""}" title="${i + 1}. ${esc(c.command.slice(0, 50))}" onclick="go(${i})"></i>`;
   }).join("") + `</div>`;
 }
 function draw() {
@@ -191,6 +196,8 @@ function draw() {
   const cmdHtml = editing
     ? `<input class="cmdinput" id="cmdinput" value="${esc(shown)}" autocomplete="off">`
     : `<p class="cmd ${shown !== cand.command ? "edited" : ""}">${hl(shown)}</p>`;
+  const cl = cand.claude;
+  const claudeHtml = !cl ? "" : `<div class="claude${cl.flag ? " flag" : ""}"><b>Claude ön-incelemesi:</b> ${cl.verdict === "ok" ? "✓ doğru" : "✗ hatalı"}${cl.note ? `<div>${esc(cl.note)}</div>` : ""}</div>`;
   const allDone = firstUndecided(0) === -1;
   const after = items.slice(pos + 1).filter(x => decisions[x.id]).length;
   $("app").innerHTML = `${mapHtml()}
@@ -201,13 +208,15 @@ function draw() {
       <div class="label">Komut</div>${cmdHtml}
       <div class="label">Sistemin vermesi gereken çıktı</div>${renderGold(cand.gold)}
       ${showJson ? `<pre>${esc(JSON.stringify(cand.gold, null, 2))}</pre>` : ""}
+      ${claudeHtml}
       <div class="btns">
         <button class="wrong" onclick="decide('bad')">✗ Hatalı<small>N</small></button>
         <button class="good" onclick="decide('ok')">✓ Doğru<small>D / Enter</small></button>
       </div>
       <div class="sub"><button onclick="step_(-1)">← Önceki</button><button onclick="step_(1)">Sonraki →</button>
         <button onclick="undo()">Geri al (Z)</button><button onclick="startEdit()">Komutu düzelt (E)</button>
-        <button onclick="showJson=!showJson;draw()">Ham JSON (J)</button></div>
+        <button onclick="showJson=!showJson;draw()">Ham JSON (J)</button>
+        <button onclick="nextFlag()">Tartışmalı kart (T)</button></div>
       <details class="bulk"><summary>Toplu düzeltme</summary>
         <button class="danger" onclick="clearAfter()">Bu karttan SONRAKİ ${after} kararı sil (yedek alınır)</button></details>
     </div>${reasonStrip()}`;
@@ -254,6 +263,15 @@ function clearAfter() {
   }).catch(e => toast("SİLME BAŞARISIZ: " + e.message, true));
 }
 function startEdit() { editing = true; draw(); }
+function nextFlag() {   // önce kararsız tartışmalı kartlar, yoksa herhangi bir tartışmalı kart
+  for (const wantUndecided of [true, false]) {
+    for (let k = 1; k <= items.length; k++) {
+      const j = (pos + k) % items.length, c = items[j];
+      if (c.claude && c.claude.flag && (!wantUndecided || !decisions[c.id])) { go(j); return; }
+    }
+  }
+  toast("tartışmalı kart yok");
+}
 
 document.addEventListener("keydown", e => {
   if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -270,6 +288,7 @@ document.addEventListener("keydown", e => {
   else if (k === "z" || k === "backspace") { e.preventDefault(); undo(); }
   else if (k === "e") { e.preventDefault(); startEdit(); }
   else if (k === "j") { showJson = !showJson; draw(); }
+  else if (k === "t") nextFlag();
   else if (k >= "1" && k <= "5") setReason(k);
 });
 window.addEventListener("beforeunload", e => { if (pending > 0) { e.preventDefault(); e.returnValue = ""; } });

@@ -45,7 +45,7 @@ def test_page_and_state_are_served(server: tuple[str, ReviewState, Path]) -> Non
         assert r.status == 200 and b"SkyMind" in r.read()
     status, snap = call(base + "/api/state")
     assert status == 200 and len(snap["items"]) == 3 and snap["decisions"] == {}
-    assert set(snap["items"][0]) == {"id", "command", "gold", "category"}
+    assert set(snap["items"][0]) == {"id", "command", "gold", "category", "claude"}
 
 
 def test_decide_persists_to_the_same_file_the_terminal_tool_reads(
@@ -165,3 +165,21 @@ def test_clear_after_removes_only_later_decisions_and_keeps_a_backup(
     assert call(base + "/api/clear_after", {"id": first["id"]})[1]["cleared"] == 0
     assert not backup.exists()
     assert call(base + "/api/clear_after", {"id": "yok"})[0] == 400
+
+
+def test_snapshot_carries_optional_claude_prereview_and_works_without_it(tmp_path: Path) -> None:
+    src, dec = tmp_path / "c.jsonl", tmp_path / "d.jsonl"
+    make_candidates(src)
+    plain = ReviewState(src, dec).snapshot()
+    assert all(it["claude"] is None for it in plain["items"])  # dosya yok -> hata yok, alan boş
+    first = plain["items"][0]["id"]
+    rows = [{"id": first, "pos": 1, "verdict": "ok", "flag": True, "note": "tartışmalı"}]
+    (tmp_path / "claude_review.jsonl").write_text(
+        "\n".join(json.dumps(r, ensure_ascii=False) for r in rows) + "\n", "utf-8"
+    )
+    snap = ReviewState(src, dec).snapshot()["items"]
+    by_id = {it["id"]: it["claude"] for it in snap}
+    assert by_id[first] == {"verdict": "ok", "flag": True, "note": "tartışmalı"}
+    assert sum(v is None for v in by_id.values()) == 2  # incelemesi olmayan adaylar None
+    # insan kararı dosyasına Claude'un ön-incelemesi karışmaz
+    assert not dec.exists()
