@@ -85,5 +85,20 @@ module = ["skymind.planner.sft", "skymind.planner.dpo"]
 ignore_errors = true
 
 [[tool.mypy.overrides]]
-module = ["onnxruntime_genai", "onnxruntime_genai.*", "sklearn.*", "llama_cpp", "llama_cpp.*"]
+# CI'da ağır eğitim kütüphaneleri (torch vb.) kurulmaz; kurulu olmayan paketler Any sayılır
+module = [
+    "onnxruntime_genai", "onnxruntime_genai.*", "sklearn.*", "llama_cpp", "llama_cpp.*",
+    "torch", "torch.*", "transformers", "transformers.*", "peft", "peft.*", "trl", "trl.*",
+    "datasets", "datasets.*", "accelerate", "accelerate.*", "bitsandbytes", "bitsandbytes.*",
+]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# torch Any olduğunda @torch.inference_mode() ve StoppingCriteria alt sınıfı "tipsiz" görünür
+module = [
+    "skymind.serve.engines", "skymind.planner.infer", "skymind.nlp.train",
+    "skymind.nlp.compress", "skymind.nlp.compress_run", "skymind.rag.retrieval",
+    "skymind.optimize.merge",
+]
+disallow_untyped_decorators = false
+disallow_subclassing_any = false
