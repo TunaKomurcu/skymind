@@ -285,6 +285,15 @@ doğruluktaki 2.4 puanlık fark yönü gösterir, aralığı değil.
    bilerek zor örnekler içerir (sayı sözcükleri, `saatte 72 kilometre`, `20 dk`, `2,5 km` yükseklik, şablon dışı yer adları).
    Farkın kaynağı tek varlık düzeyinde (BERTurk 0.867 vs kurallar 0.853): **BERTurk'ün kurallardan
    daha iyi olduğu söylenemez.** Zayıf noktalar ALT (F1 0.58) ve DUR (0.67); diğer türler 1.0.
+   **Hata analizi (ZOR bölümü, 40 cümlenin tamamı elle etiketlerle karşılaştırıldı):** BERTurk yalnızca 4 cümlede ayrışıyor
+   ve dördü de **yazıyla yazılmış sayı** ("bin beş yüz metre", "yüz elli metre", "iki bin metre", "yarım saat"): model
+   bunları parçalıyor. Eğitim komutları hep rakamla yazıldığı için beklenen bir başarısızlık, etiket hatası değil.
+   Aynı sınamada kural tabanlı etiketleyici 8 cümlede ayrışıyor: yazıyla sayılar, görmediği birimler ("dk", "ft", "saat")
+   ve görmediği yer adları ("hastane", "stadyuma", "havaalanı"); BERTurk bu birim ve yer adlarını doğru buluyor. Yani
+   benzer toplam skor (0.867 vs 0.853) **farklı hata türlerini** gizliyor: BERTurk görülmemiş birim/yer adına genelliyor,
+   yazıyla sayıya genelleyemiyor; kurallar ikisinde de başarısız. Mekanik etiket tutarlılığı (etiket dışında kalan
+   sayı, birimsiz süre/mesafe, kenarda noktalama) 40 cümlede 0 sorun buldu. Model ya da kuralın ürettiği ama elle
+   etiketlenmemiş tek varlık, yazıyla sayıların parçalanmış parçalarıdır (etiket hatası ipucu değil).
 3. n=20/20 küçük: tek varlık hatası mikro-F1'i ~1–2 puan oynatır. Elle set eğitim verisinden bağımsız ama
    **Claude (asistan) tarafından yazıldı**, proje sahibi gözden geçirmedi; üslup önyargısı olabilir.
 
