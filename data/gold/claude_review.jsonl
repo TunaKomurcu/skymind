@@ -196,7 +196,7 @@
 {"id": "739ff7ab9b87", "pos": 196, "verdict": "ok", "flag": false, "note": ""}
 {"id": "e3bd934112b5", "pos": 197, "verdict": "ok", "flag": false, "note": ""}
 {"id": "3085725772ff", "pos": 198, "verdict": "ok", "flag": false, "note": ""}
-{"id": "d485b12685f5", "pos": 199, "verdict": "ok", "flag": false, "note": ""}
+{"id": "d485b12685f5", "pos": 199, "verdict": "ok", "flag": true, "note": "Tartışmalı: 'geri dön' eve dönüş (return_to_launch) olarak yorumlanmış; önceki konuma ya da bir önceki noktaya dönüş de kastedilebilir. 'üsse dön / geri çekil' kartlarında bu belirsizlik yok."}
 {"id": "fa2e6dd2c050", "pos": 200, "verdict": "ok", "flag": false, "note": ""}
 {"id": "579dc316ffd8", "pos": 201, "verdict": "ok", "flag": false, "note": ""}
 {"id": "f1499a978cb4", "pos": 202, "verdict": "ok", "flag": false, "note": ""}
@@ -240,14 +240,14 @@
 {"id": "b5af35ced126", "pos": 240, "verdict": "ok", "flag": false, "note": ""}
 {"id": "54b790a811bd", "pos": 241, "verdict": "ok", "flag": false, "note": ""}
 {"id": "7a1dca2501ba", "pos": 242, "verdict": "ok", "flag": false, "note": ""}
-{"id": "5c793219fef5", "pos": 243, "verdict": "ok", "flag": false, "note": ""}
-{"id": "b21851dea3b0", "pos": 244, "verdict": "ok", "flag": false, "note": ""}
+{"id": "5c793219fef5", "pos": 243, "verdict": "ok", "flag": true, "note": "Tartışmalı: 'geri dön' eve dönüş (return_to_launch) olarak yorumlanmış; önceki konuma ya da bir önceki noktaya dönüş de kastedilebilir. 'üsse dön / geri çekil' kartlarında bu belirsizlik yok."}
+{"id": "b21851dea3b0", "pos": 244, "verdict": "ok", "flag": true, "note": "Tartışmalı: 'geri dön' eve dönüş (return_to_launch) olarak yorumlanmış; önceki konuma ya da bir önceki noktaya dönüş de kastedilebilir. 'üsse dön / geri çekil' kartlarında bu belirsizlik yok."}
 {"id": "a17495077dbb", "pos": 245, "verdict": "ok", "flag": false, "note": ""}
 {"id": "0f750cea306f", "pos": 246, "verdict": "ok", "flag": false, "note": ""}
 {"id": "1b0f76ea4a97", "pos": 247, "verdict": "ok", "flag": false, "note": ""}
 {"id": "13a0e2828d4f", "pos": 248, "verdict": "ok", "flag": false, "note": ""}
 {"id": "b8b29539a536", "pos": 249, "verdict": "ok", "flag": false, "note": ""}
-{"id": "7d7046bc5332", "pos": 250, "verdict": "ok", "flag": false, "note": ""}
+{"id": "7d7046bc5332", "pos": 250, "verdict": "ok", "flag": true, "note": "Tartışmalı: 'geri dön' eve dönüş (return_to_launch) olarak yorumlanmış; önceki konuma ya da bir önceki noktaya dönüş de kastedilebilir. 'üsse dön / geri çekil' kartlarında bu belirsizlik yok."}
 {"id": "a65c5b8fcce4", "pos": 251, "verdict": "ok", "flag": false, "note": ""}
 {"id": "7144f932aa83", "pos": 252, "verdict": "ok", "flag": false, "note": ""}
 {"id": "08a122e20424", "pos": 253, "verdict": "ok", "flag": false, "note": ""}

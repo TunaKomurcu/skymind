@@ -4,7 +4,7 @@ Amaç: 300 şablon-üretimli aday komutu insan gözüyle doğrulayıp `data/gold
 planlayıcı sonuçları yalnızca sentetik test kümesinde kalır (sentetik veri ve aynı üretici dağılımı).
 
 ## Claude ön-incelemesi ve kökeni (raporda belirtilecek)
-`data/gold/claude_review.jsonl`: Claude 300 adayın **tamamını elle okudu** (komut + çıktı), hata bulmadı; 15 kartı
+`data/gold/claude_review.jsonl`: Claude 300 adayın **tamamını elle okudu** (komut + çıktı), hata bulmadı; 19 kartı
 "tartışmalı" (sarı çerçeve, `T` tuşuyla atlanır), 3 kartı notla işaretledi. Arayüz bunu kartın altında gösterir.
 Bu dosya **insan kararından ayrıdır**; `gold_reviewed.jsonl` yalnızca senin kararlarını içerir.
 
