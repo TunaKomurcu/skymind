@@ -48,6 +48,17 @@ kategorilere dengeli dağılmış bir örnektir**, yani hepsini bitirmesen de (�
 | `b` | bu oturumdaki son kararı geri al |
 | `q` | kaydet ve çık |
 
+**Karar ölçütü (en sık takıldığın yer):** *"Komutu uygulamak için komutta olmayan bir değer, hedef ya da yön
+uydurmam gerekir mi?"* Evet ise netleştirme sorusu **doğru**, hayır ise soru **gereksiz** (hatalı).
+Örnek: komut "Hızı artır", çıktı "Hız bilgisini eksik aldım, netleştirir misiniz?" → **doğru** (hız sayısı yok,
+uydurmadan plan çıkmaz). Komut "Hızı 20 m/s yap" iken aynı soru çıkarsa → **hatalı** (gereksiz soru).
+
+**Hatalı nedeni (isteğe bağlı, hızı bozmaz):** `N`'ye basınca kart hemen ilerler; altta görünen şeritte
+`1–5` ile neden seçebilirsin (aynı tuşa tekrar basmak siler). Seçmezsen yalnızca "hatalı" kalır.
+`1` komut yapay/anlamsız · `2` çıktı komuta uymuyor (sayı/yön/yer) · `3` gereksiz soru (bilgi komutta var) ·
+`4` soru gerekliydi (bilgi eksik ama plan üretilmiş) · `5` ret yersiz ya da ret gerekliydi.
+Dağılım `--stats` ile görülür ve şablon veri kalitesi bulgusu olarak rapora girer.
+
 Plan JSON'unu elle düzeltmek zahmetli; kararsız ya da bozuk plan adaylarını `n` ile atmak yeterlidir.
 
 ## İlerleme ve dışa aktarma

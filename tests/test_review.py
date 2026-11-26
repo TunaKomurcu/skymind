@@ -54,10 +54,12 @@ def test_review_flow_resume_undo_edit_and_export(
     make_candidates(src)
     order = [c["id"] for c in review.load_candidates(src)]
     # sıra: 1. aday doğru (Enter), 2. aday hatalı (n), sonra çık
-    feed(monkeypatch, ["", "n", "q"])
+    feed(monkeypatch, ["", "n", "3", "q"])  # n sonrası neden sorulur: 3 = gereksiz soru
     review.run(src, dec)
     d = review.load_decisions(dec)
     assert d[order[0]]["status"] == "ok" and d[order[1]]["status"] == "bad"
+    assert d[order[1]]["reason"] == "gereksiz_soru" and d[order[0]]["reason"] == ""
+    assert review.reason_counts(dec) == {"gereksiz_soru": 1}
     # yeniden başlat: yalnızca 3. aday kalmış olmalı; komutu düzelt (c) ve onayla -> edited
     feed(monkeypatch, ["c", "yeni komut metni", "", "q"])
     review.run(src, dec)

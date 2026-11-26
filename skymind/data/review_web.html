@@ -60,6 +60,11 @@
   .toast.err { border-color: var(--bad); color: var(--bad); font-weight: 700; }
   .done { text-align: center; padding: 40px 10px; } .done h2 { margin-top: 0; }
   code { background: var(--bg); padding: 2px 6px; border-radius: 5px; }
+  .reasons { margin-top: 12px; font-size: 14px; color: var(--muted); }
+  .rchips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .rchip { font: inherit; font-size: 13px; font-weight: 500; padding: 5px 10px; border-radius: 99px;
+           background: var(--card); color: var(--ink); border: 1px solid var(--line); cursor: pointer; }
+  .rchip.on { border-color: var(--bad); background: var(--bad-bg); color: var(--bad); font-weight: 700; }
 </style>
 </head>
 <body>
@@ -109,6 +114,25 @@ function renderGold(g) {
 }
 
 let items = [], decisions = {}, skipped = new Set(), history = [], showJson = false, editing = false, editedCmd = null, pending = 0;
+let lastBad = null;   // {id, command, saved: Promise, reason}  son "hatalı" kararın isteğe bağlı nedeni için
+const REASONS = {"1":["komut_yapay","komut yapay/anlamsız"], "2":["cikti_komuta_uymuyor","çıktı komuta uymuyor (sayı/yön/yer)"],
+  "3":["gereksiz_soru","gereksiz soru (bilgi komutta var)"], "4":["soru_gerekliydi","soru gerekliydi (bilgi eksik)"],
+  "5":["ret_hatali","ret yersiz ya da ret gerekliydi"]};
+function reasonStrip() {
+  if (!lastBad) return "";
+  const head = `<b>Hatalı:</b> “${esc(lastBad.command.length > 48 ? lastBad.command.slice(0, 48) + "…" : lastBad.command)}” — neden? <span style="opacity:.7">(isteğe bağlı)</span>`;
+  const chips = Object.entries(REASONS).map(([k, [code, label]]) =>
+    `<button class="rchip${lastBad.reason === code ? " on" : ""}" onclick="setReason('${k}')"><kbd>${k}</kbd> ${esc(label)}</button>`).join("");
+  return `<div class="reasons">${head}<div class="rchips">${chips}</div></div>`;
+}
+function setReason(k) {
+  if (!lastBad || !REASONS[k]) return;
+  const code = REASONS[k][0], b = lastBad;
+  b.reason = b.reason === code ? "" : code;   // aynı tuşa tekrar basmak temizler
+  draw();
+  b.saved.then(() => api("/api/reason", {id: b.id, reason: b.reason}))
+    .catch(e => toast("NEDEN KAYDEDİLEMEDİ: " + e.message, true));
+}
 
 const $ = id => document.getElementById(id);
 function toast(msg, err) { const t = $("toast"); t.textContent = msg; t.className = "toast" + (err ? " err" : ""); t.hidden = false;
@@ -153,7 +177,7 @@ function draw() {
     </div>
     <div class="sub"><button onclick="skip()">Atla (S)</button><button onclick="undo()">Geri al (Z)</button>
       <button onclick="startEdit()">Komutu düzelt (E)</button><button onclick="showJson=!showJson;draw()">Ham JSON (J)</button></div>
-  </div>`;
+  </div>${reasonStrip()}`;
   if (editing) { const i = $("cmdinput"); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }
 }
 function decide(kind) {
@@ -161,15 +185,17 @@ function decide(kind) {
   const command = editedCmd ?? cand.command;
   const status = kind === "bad" ? "bad" : (command !== cand.command ? "edited" : "ok");
   decisions[cand.id] = {status, command}; history.push(cand.id); editedCmd = null; editing = false;
-  draw();
   pending++;
-  api("/api/decide", {id: cand.id, status, command}).then(() => { pending--; toast("kaydedildi ✓"); })
+  const saved = api("/api/decide", {id: cand.id, status, command});
+  saved.then(() => { pending--; toast("kaydedildi ✓"); })
     .catch(e => { pending--; toast("KAYIT BAŞARISIZ: " + e.message + " (sunucu çalışıyor mu?)", true); });
+  lastBad = status === "bad" ? {id: cand.id, command, saved, reason: ""} : null;
+  draw();
 }
-function skip() { const c = current(); if (!c) return; skipped.add(c.id); editedCmd = null; editing = false; draw(); }
+function skip() { const c = current(); if (!c) return; skipped.add(c.id); editedCmd = null; editing = false; lastBad = null; draw(); }
 function undo() {
   const id = history.pop(); if (!id) { toast("geri alınacak karar yok"); return; }
-  delete decisions[id]; skipped.delete(id); editedCmd = null; editing = false;
+  delete decisions[id]; skipped.delete(id); editedCmd = null; editing = false; lastBad = null;
   // geri alınan aday sıranın en başına dönsün: atlananlar listesine koymadan, ilk bekleyen o olacak
   const idx = items.findIndex(c => c.id === id); const [it] = items.splice(idx, 1); items.unshift(it);
   draw(); api("/api/undo", {id}).catch(e => toast("GERİ ALMA BAŞARISIZ: " + e.message, true));
@@ -190,6 +216,7 @@ document.addEventListener("keydown", e => {
   else if (k === "z" || k === "backspace") { e.preventDefault(); undo(); }
   else if (k === "e") { e.preventDefault(); startEdit(); }
   else if (k === "j") { showJson = !showJson; draw(); }
+  else if (k >= "1" && k <= "5") setReason(k);
 });
 window.addEventListener("beforeunload", e => { if (pending > 0) { e.preventDefault(); e.returnValue = ""; } });
 

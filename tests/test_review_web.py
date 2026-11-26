@@ -99,3 +99,24 @@ def test_foreign_host_header_is_refused(server: tuple[str, ReviewState, Path]) -
     assert call(base + "/api/state", host="evil.example.com")[0] == 403
     assert call(base + "/api/undo", {"id": "a"}, host="evil.example.com")[0] == 403
     assert call(base + "/api/state", host="localhost:8765")[0] == 200
+
+
+def test_reason_can_be_added_to_a_bad_decision_only_and_is_validated(
+    server: tuple[str, ReviewState, Path],
+) -> None:
+    base, state, dec = server
+    a, b = state.items[0], state.items[1]
+    call(base + "/api/decide", {"id": a["id"], "status": "bad", "command": a["command"]})
+    call(base + "/api/decide", {"id": b["id"], "status": "ok", "command": b["command"]})
+    assert call(base + "/api/reason", {"id": a["id"], "reason": "gereksiz_soru"})[0] == 200
+    assert review.load_decisions(dec)[a["id"]]["reason"] == "gereksiz_soru"
+    assert review.reason_counts(dec) == {"gereksiz_soru": 1}
+    # aynı kodu tekrar göndermek değil, boş göndermek temizler
+    assert call(base + "/api/reason", {"id": a["id"], "reason": ""})[0] == 200
+    assert review.reason_counts(dec) == {"belirtilmedi": 1}
+    for body in (
+        {"id": a["id"], "reason": "uydurma_kod"},  # bilinmeyen neden
+        {"id": b["id"], "reason": "gereksiz_soru"},  # doğru işaretlenmiş adaya neden eklenemez
+        {"id": "yok", "reason": "gereksiz_soru"},
+    ):
+        assert call(base + "/api/reason", body)[0] == 400

@@ -16,7 +16,13 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
-from skymind.data.review import load_candidates, load_decisions, record, save_decisions
+from skymind.data.review import (
+    REASON_CODES,
+    load_candidates,
+    load_decisions,
+    record,
+    save_decisions,
+)
 
 PAGE = Path(__file__).with_name("review_web.html")
 MAX_BODY = 20_000
@@ -62,6 +68,19 @@ class ReviewState:
             self.decisions[cand["id"]] = record(cand, status, command, cand["gold"])
             save_decisions(self.path, self.decisions)
         return {"saved": cand["id"], "status": status}
+
+    def reason(self, body: dict[str, Any]) -> dict[str, Any]:
+        """ "Hatalı" işaretli adaya isteğe bağlı neden ekler (boş kod nedeni temizler)."""
+        cid, code = body.get("id"), body.get("reason", "")
+        if code not in REASON_CODES and code != "":
+            raise ValueError("geçersiz neden")
+        with self._lock:
+            d = self.decisions.get(cid) if isinstance(cid, str) else None
+            if d is None or d["status"] != "bad":
+                raise ValueError("neden yalnızca hatalı işaretlenmiş adaya eklenir")
+            d["reason"] = code
+            save_decisions(self.path, self.decisions)
+        return {"reason": code}
 
     def undo(self, body: dict[str, Any]) -> dict[str, Any]:
         cid = body.get("id")
@@ -116,6 +135,8 @@ def make_handler(state: ReviewState) -> type[BaseHTTPRequestHandler]:
                     return self._json(200, state.decide(body))
                 if self.path == "/api/undo":
                     return self._json(200, state.undo(body))
+                if self.path == "/api/reason":
+                    return self._json(200, state.reason(body))
             except (ValueError, json.JSONDecodeError) as e:
                 return self._json(HTTPStatus.BAD_REQUEST, {"error": str(e)})
             self._json(HTTPStatus.NOT_FOUND, {"error": "yok"})

@@ -31,6 +31,15 @@ from skymind.data.generator import numbers_in
 from skymind.schemas import parse_output
 
 DONE = ("ok", "bad", "edited")
+# "Hatalı" kararının isteğe bağlı nedeni (tuş -> (kod, açıklama)); veri kalitesi bulgusu için sayılır.
+REASONS: dict[str, tuple[str, str]] = {
+    "1": ("komut_yapay", "komut yapay/anlamsız"),
+    "2": ("cikti_komuta_uymuyor", "çıktı komuta uymuyor (sayı/yön/yer)"),
+    "3": ("gereksiz_soru", "gereksiz soru (bilgi komutta var)"),
+    "4": ("soru_gerekliydi", "soru gerekliydi (bilgi eksik, plan üretilmiş)"),
+    "5": ("ret_hatali", "ret yersiz ya da ret gerekliydi"),
+}
+REASON_CODES = {code for code, _ in REASONS.values()}
 HELP = (
     "  [Enter] doğru   [n] hatalı (kümeden at)   [c] komutu düzelt   [g] altın çıktıyı düzelt (JSON)\n"
     "  [k] not ekle    [s] atla (sonra gelir)    [b] geri al          [q] kaydet ve çık   [?] yardım"
@@ -74,7 +83,12 @@ def render_gold(gold: dict[str, Any]) -> str:
 
 
 def record(
-    cand: dict[str, Any], status: str, command: str, gold: dict[str, Any], note: str = ""
+    cand: dict[str, Any],
+    status: str,
+    command: str,
+    gold: dict[str, Any],
+    note: str = "",
+    reason: str = "",
 ) -> dict[str, Any]:
     return {
         "id": cand["id"],
@@ -83,8 +97,19 @@ def record(
         "gold": gold,
         "category": cand["category"],
         "note": note,
+        "reason": reason,
         "ts": int(time.time()),
     }
+
+
+def reason_counts(decisions_path: Path) -> dict[str, int]:
+    """Hatalı kararların neden dağılımı ("" = neden girilmedi)."""
+    out: dict[str, int] = {}
+    for d in load_decisions(decisions_path).values():
+        if d["status"] == "bad":
+            key = d.get("reason") or "belirtilmedi"
+            out[key] = out.get(key, 0) + 1
+    return out
 
 
 def validate_gold(text: str) -> dict[str, Any]:
@@ -178,7 +203,10 @@ def run(candidates: Path, decisions_path: Path, seed: int = 0) -> None:
                 history.append(cand["id"])
                 break
             if key == "n":
-                dec[cand["id"]] = record(cand, "bad", cmd, gold, note or "hatalı")
+                menu = "  ".join(f"[{k}] {v[1]}" for k, v in REASONS.items())
+                pick = _prompt(f"neden? {menu}  (Enter = geç): ").strip()
+                reason = REASONS[pick][0] if pick in REASONS else ""
+                dec[cand["id"]] = record(cand, "bad", cmd, gold, note or "hatalı", reason)
                 history.append(cand["id"])
                 break
             if key == "s":
@@ -244,6 +272,7 @@ def main() -> None:
         serve(a.src, a.decisions, a.seed, a.port, open_browser=not a.no_browser)
     elif a.stats:
         print(json.dumps(stats(a.src, a.decisions, a.seed), ensure_ascii=False))
+        print("hatalı nedenleri:", json.dumps(reason_counts(a.decisions), ensure_ascii=False))
     elif a.export:
         print(json.dumps(export(a.src, a.decisions, a.out, a.seed), ensure_ascii=False))
         print(f"-> {a.out}")
