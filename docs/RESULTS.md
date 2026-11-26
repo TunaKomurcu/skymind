@@ -322,7 +322,7 @@ Hedef sorular: öğrenci ne kadar küçülür/hızlanır, ne kadar doğruluk kay
 çapraz entropiden (CE) iyi mi; budama gerçekten hız kazandırıyor mu? Test: niyet, n=1477.
 
 **Yöntem (ilk koşu kirliydi, yeniden tasarlandı):** ilk sürümde öğrenciler ince ayarlı öğretmenin
-ağırlıklarından başlayıp fazladan eğitim almış, gecikmeler de ben başka iş yaparken ölçülmüştü
+ağırlıklarından başlayıp fazladan eğitim almış, gecikmeler de arka planda başka iş çalışırken ölçülmüştü
 (`outputs/nlp/compress-v1-confounded.json`, kullanılmıyor). Şimdi:
 * Öğrenciler **önceden eğitilmiş BERT**'in katman alt kümesinden başlar (6L: 0,2,4,6,8,10; 4L: 0,4,8,11;
   2L: 0,11), öğretmenle aynı 3 epoch. KD = CE + öğretmen yumuşak hedefleri.
@@ -376,7 +376,7 @@ ağırlıklarından başlayıp fazladan eğitim almış, gecikmeler de ben başk
    KD kazancı **gösterilmedi**.
 5. **Makro-F1 neredeyse iki kipli (~0.89 ya da ~0.94–0.99) ve sd büyük.** Doğruluk 0.99 iken makro-F1'in
    0.89'a düşmesi, bir az örnekli sınıfın bazı koşularda hiç doğru bulunmadığını gösteriyor. Hangi
-   sınıf olduğunu koşu başına sınıf raporu kaydetmediğim için **doğrulamadım** (tahmin: test kümesinde
+   sınıf olduğunu koşu başına sınıf raporu kaydedilmediği için **doğrulanmadı** (tahmin: test kümesinde
    en az örnekli niyet). Makro-F1 farkları bu yüzden doğruluktan daha gürültülü okunmalı.
 6. Tek veri kümesi, tek görev (niyet), 2 tohum, öğrenci eğitimi 3 epoch. Parametre sayısı ≠ gecikme;
    gecikme kendi donanımımda ölçüldü (4 iş parçacığı), başka CPU'da oranlar değişebilir.
@@ -411,7 +411,7 @@ Sözcüksel sorularda doğruluk 31/31, paraphrase'te 0.517 (R@3 0.62).
 ### Okuma ve uyarılar
 1. **Ana darboğaz üretici değil retrieval:** doğru parça geldiğinde doğruluk %94; gelmediğinde model
    8/11 kez dürüstçe vazgeçti, 3 kez **yanlış parçadan, makul görünen yanlış cevap** verdi
-   (ör. sorulan duruma uymayan bir hata kodunu veya başka bir değeri, geçerli bir atıfla; başka modelin değeri olup olmadığını tek tek doğrulamadım).
+   (ör. sorulan duruma uymayan bir hata kodunu veya başka bir değeri, geçerli bir atıfla; başka modelin değeri olup olmadığını tek tek doğrulanmadı).
 2. **Atıf geçerliliği 1.0 desteklenme anlamına gelmez.** Ölçü yalnızca atfın var olan bir parça+cümleyi
    gösterdiğini doğrular; o cümlenin cevabı gerçekten desteklediğini değil. Yukarıdaki 3 yanlış cevap
    geçerli atıf taşıyor. Desteklenme (NLI/insan) ölçülmedi.
@@ -460,7 +460,7 @@ olduğunun kanıtı değildir (özet kalitesi/okunabilirliği ölçülmedi, kura
 1. **Metrik iki kez düzeltildi, sonuçlar görüldükten sonra.** İlk koşuda uydurma-sayı oranları 0.43/0.56
    (27B METAR/NOTAM) çıktı; incelemede bir kısmı metriğin kusuruydu (ör. `061650Z` → "1650", `0800-1600` →
    "08:00", yıl "25" → "2025", koordinatın derece/dakikaya bölünmesi, ham zaman kodunun parçalanması,
-   ay adıyla yazılmış tarih). Bu meşru yeniden biçimlendirmeleri türetilmiş sayıdan saydım; yukarıdaki
+   ay adıyla yazılmış tarih). Bu meşru yeniden biçimlendirmeler türetilmiş sayı olarak kabul edildi; yukarıdaki
    tablo düzeltilmiş metrikle. Düzeltmeler yalnızca *gevşetme* yönündeydi ama post-hoc yapıldı, bu bir
    ayarlama riskidir; ham özetler `outputs/eval/summ-llm.json`'da (git'e girmez) denetlenebilir.
 2. **Sayı denetimi hâlâ alt sınır:** kaynakta başka yerde geçen bir sayıyla çakışan yanlış sayı yakalanmaz.

@@ -1,90 +1,75 @@
-# Altın küme inceleme rehberi
+# Altın küme ve NER seti: insan inceleme rehberi
 
-Amaç: 300 şablon-üretimli aday komutu insan gözüyle doğrulayıp `data/gold/gold.jsonl` üretmek. Bu olmadan
-planlayıcı sonuçları yalnızca sentetik test kümesinde kalır (sentetik veri ve aynı üretici dağılımı).
+**Amaç:** 300 şablon üretimli aday komutu insan gözüyle doğrulayıp `data/gold/gold.jsonl` üretmek (ve 40 cümlelik NER elle
+setini aynı yöntemle doğrulamak). Bu olmadan planlayıcı sonuçları yalnızca sentetik test kümesinde kalır.
 
-## Claude ön-incelemesi ve kökeni (raporda belirtilecek)
-`data/gold/claude_review.jsonl`: Claude 300 adayın **tamamını elle okudu** (komut + çıktı), hata bulmadı; 23 kartı
-"tartışmalı" (sarı çerçeve, `T` tuşuyla atlanır), 3 kartı notla işaretledi. Arayüz bunu kartın altında gösterir.
-Bu dosya **insan kararından ayrıdır**; `gold_reviewed.jsonl` yalnızca senin kararlarını içerir.
+**Durum:** tamamlandı. Altın küme 300/300 ve NER seti 40/40 incelendi, hepsi doğru bulundu (kayıtlar
+`data/gold/gold_reviewed.jsonl` ve `data/gold/ner_manual_reviewed.jsonl`). Sonuçlar ve gri alanlar: `data/gold/README.md`.
 
-Dürüstlük notları (rapora girer):
-* **Bağımsızlık sınırlı:** ön-inceleyen Claude, şablonları ve altın çıktıları üreten sistemle aynı soydan; ortak bir
-  kör nokta olabilir. "Hepsi doğru" bulgusu bu yüzden **zayıf kanıttır**, gerçek değer insan gözünden gelir.
-* **Otomasyon yanlılığı:** Claude'un "✓ doğru" kutusunu görünce körlemesine Enter'a basmak kolaydır. Önce komuta ve
-  çıktıya bak, kutuya sonra. İlk 25 kartı Claude'un görüşünü görmeden kendin işaretledin (bağımsız): Claude ile
-  25/25 uyum.
-* Raporda şu şekilde yazılır: "300 adayın tamamı Claude tarafından ön-incelendi; insan (proje sahibi) bu ön-incelemeyi
-  görerek N adayı doğruladı". N = senin incelediğin adet.
+## Ön-inceleme ve kökeni
+`data/gold/claude_review.jsonl`: Claude 300 adayın tamamını okudu (komut + çıktı), hata bulmadı; 23 kartı "tartışmalı"
+olarak işaretledi (haritada sarı çerçeve, `T` tuşuyla atlanır) ve kartın altında gerekçesini gösterir. Bu dosya **insan
+kararından ayrıdır**; `gold_reviewed.jsonl` yalnızca inceleyenin kararlarını içerir.
 
-## Hızlı yol: web arayüzü (önerilen, ~10 sn/aday)
+Bilinen sınırlar:
+* **Bağımsızlık sınırlı:** ön-inceleyen Claude, şablonları ve altın çıktıları üreten sistemle aynı soydandır; ortak bir kör nokta
+  olabilir. "Hepsi doğru" bulgusu bu yüzden zayıf kanıttır, asıl değer insan incelemesinden gelir.
+* **Otomasyon yanlılığı:** ön-incelemenin "✓ doğru" kutusunu görünce otomatik onaylamak kolaydır; önce komuta ve çıktıya, sonra
+  kutuya bakılmalıdır. İlk 25 kart ön-inceleme görülmeden işaretlendi (Claude ile 25/25 uyum).
 
-```bat
-cd skymind
-uv run python -m skymind.data.review --web
+## Web arayüzü (önerilen, kart başına ~10 sn)
+```bash
+uv run python -m skymind.data.review --web       # altın küme, http://127.0.0.1:8765
+uv run python -m skymind.data.ner_review --web   # NER seti,   http://127.0.0.1:8766
 ```
+Sunucu yalnızca yerel makineden erişilebilir (127.0.0.1), kararlar her tıklamada diske yazılır; sekme kapatılıp sonra aynı komutla
+devam edilebilir. Her kart komutu, sistemin vermesi gereken çıktıyı (okunur Türkçe, sayılar vurgulu) ve ön-inceleme kutusunu gösterir.
+Üstteki haritada her kart bir kutudur (yeşil doğru, kırmızı hatalı, gri kararsız, sarı çerçeve tartışmalı); tıklayınca o karta gidilir.
 
-Tarayıcıda `http://127.0.0.1:8765` açılır (yalnızca bu bilgisayardan erişilir). Her aday tek kartta: komut,
-sistemin vermesi gereken çıktı (okunur Türkçe, sayılar sarıyla vurgulu). **Klavyeyle:**
-`→` / `Enter` / `D` doğru, `←` / `N` hatalı, `S` atla, `Z` geri al, `E` komutu düzelt, `J` ham JSON.
-Her kararda otomatik diske yazılır; sekmeyi kapatıp sonra aynı komutla devam edebilirsin. Bitince terminalde
-`Ctrl+C` ile sunucuyu kapat.
-
-## Alternatif: terminal aracı (ayrı bir terminalde; Claude Code içindeki `!` istemi etkileşimli girdiyi desteklemez)
-
-```bat
-cd skymind
-uv run python -m skymind.data.review
-```
-
-Web arayüzüyle terminal aracı **aynı dosyayı** (`gold_reviewed.jsonl`) kullanır, birini bırakıp diğerine geçebilirsin.
-İlerlemen her karardan sonra `data/gold/gold_reviewed.jsonl` dosyasına yazılır. İstediğin an `q` ile çık, aynı
-komutla kaldığın yerden devam edersin. Adaylar sabit bir sırayla karıştırılmıştır: **ilk N aday her zaman
-kategorilere dengeli dağılmış bir örnektir**, yani hepsini bitirmesen de (örn. ilk 100) temsilî bir küme çıkar.
-
-## Her aday için iki soru
-1. **Komut** doğal, anlaşılır bir Türkçe operatör komutu mu? (Değilse `c` ile düzelt ya da `n` ile at.)
-2. **Altın çıktı** doğru mu?
-   * `plan`: komuttaki her sayı, yön ve yer çıktıda doğru; komutta olmayan hiçbir şey eklenmemiş. Adım sırası komutla uyumlu.
-   * `clarification`: komutta gerçekten zorunlu bir bilgi eksik (hedef, irtifa, hız gibi) ve soru makul.
-     Eksik bilgi komutta aslında varsa **hatalı** işaretle.
-   * `refusal`: komut gerçekten güvensiz ya da kapsam dışı (silah, sınır ihlali, havalimanı pisti vb.).
-
-## Tuşlar
 | Tuş | Anlamı |
 |---|---|
-| Enter | doğru, kümeye al |
-| `n` | hatalı, kümeden at (en hızlı yol; kararsızsan at) |
-| `c` | komutu düzelt (yeni komutu yaz), sonra Enter |
-| `g` | altın çıktıyı düzelt: tek satır JSON yapıştır, şemaya göre doğrulanır |
-| `k` | karara not ekle |
-| `s` | atla, sonra yeniden gelir |
-| `b` | bu oturumdaki son kararı geri al |
-| `q` | kaydet ve çık |
+| `D` / `Enter` | doğru |
+| `N` | hatalı (kümeden çıkar) |
+| `←` / `→` | önceki / sonraki kart (karar vermez; geçmiş kararlar düzeltilebilir) |
+| `Z` | oturumdaki son kararı geri al |
+| `E` | komutu (altın küme) ya da etiketleri (NER) düzelt |
+| `J` | ham JSON (altın küme) |
+| `T` | sonraki tartışmalı kart |
+| `1`–`5` | "hatalı" nedeni (isteğe bağlı) |
 
-**Karar ölçütü (en sık takıldığın yer):** *"Komutu uygulamak için komutta olmayan bir değer, hedef ya da yön
-uydurmam gerekir mi?"* Evet ise netleştirme sorusu **doğru**, hayır ise soru **gereksiz** (hatalı).
-Örnek: komut "Hızı artır", çıktı "Hız bilgisini eksik aldım, netleştirir misiniz?" → **doğru** (hız sayısı yok,
-uydurmadan plan çıkmaz). Komut "Hızı 20 m/s yap" iken aynı soru çıkarsa → **hatalı** (gereksiz soru).
+"Toplu düzeltme" bölümü, seçili karttan sonraki tüm kararları siler (silmeden önce yedek `gold_reviewed.bak.jsonl` alınır).
 
-**Hatalı nedeni (isteğe bağlı, hızı bozmaz):** `N`'ye basınca kart hemen ilerler; altta görünen şeritte
-`1–5` ile neden seçebilirsin (aynı tuşa tekrar basmak siler). Seçmezsen yalnızca "hatalı" kalır.
-`1` komut yapay/anlamsız · `2` çıktı komuta uymuyor (sayı/yön/yer) · `3` gereksiz soru (bilgi komutta var) ·
-`4` soru gerekliydi (bilgi eksik ama plan üretilmiş) · `5` ret yersiz ya da ret gerekliydi.
-Dağılım `--stats` ile görülür ve şablon veri kalitesi bulgusu olarak rapora girer.
-
-Plan JSON'unu elle düzeltmek zahmetli; kararsız ya da bozuk plan adaylarını `n` ile atmak yeterlidir.
-
-## İlerleme ve dışa aktarma
-```bat
-uv run python -m skymind.data.review --stats     :: toplam / ok / edited / bad / pending
-uv run python -m skymind.data.review --export    :: ok + edited olanlardan data/gold/gold.jsonl üretir
+## Terminal aracı (alternatif)
+```bash
+uv run python -m skymind.data.review      # etkileşimli terminalde: Enter doğru, n hatalı, c komut, g JSON, s atla, b geri, q çık
 ```
+Web arayüzüyle aynı dosyayı kullanır; biri bırakılıp diğerine geçilebilir.
 
-Beklenen süre: ~30–60 sn/aday (bozuk olanlar daha hızlı). 100 aday ≈ 1 saat.
+## Karar ölçütleri
+Her aday için iki soru:
+1. **Komut** doğal, anlaşılır bir Türkçe operatör komutu mu?
+2. **Altın çıktı** doğru mu?
+   * `plan`: komuttaki her sayı, yön ve yer çıktıda doğru; komutta olmayan hiçbir şey eklenmemiş; adım sırası komutla uyumlu.
+   * `clarification`: komutta gerçekten zorunlu bir bilgi (hedef, irtifa, hız gibi) eksik ve soru makul.
+   * `refusal`: komut gerçekten güvensiz ya da kapsam dışı (silah, sınır ihlali, havalimanı pisti vb.).
 
-## İş bitince ben ne yapacağım
-`data/gold/gold.jsonl` ile (planlayıcı değerlendirme formatıyla uyumlu) SFT ve DPO'yu yeniden ölçeriz:
-`python -m skymind.planner.evaluate --name sft-gold --adapter ... --data data/gold/gold.jsonl --limit 0`
-(~20–30 dk, GPU), sonuçlar `docs/RESULTS.md`'ye "gold" sütunu olarak eklenir. Kaç aday attığın da (bad oranı)
-şablon verinin kalitesi hakkında kendi başına bir bulgudur ve rapora yazılır.
+**Netleştirme sorularında ölçüt:** *"Komutu uygulamak için komutta olmayan bir değer, hedef ya da yön uydurmak gerekir mi?"* Evet
+ise soru **doğru**, hayır ise **gereksiz** (hatalı). Örnek: "Hızı artır" komutuna "Hız bilgisini eksik aldım, netleştirir misiniz?"
+doğru çıktıdır (hız sayısı yok); "Hızı 20 m/s yap" komutuna aynı soru gelirse hatalıdır.
+
+**Hatalı nedeni (isteğe bağlı):** `1` komut yapay/anlamsız · `2` çıktı komuta uymuyor (sayı/yön/yer) · `3` gereksiz soru (bilgi
+komutta var) · `4` soru gerekliydi (bilgi eksik ama plan üretilmiş) · `5` ret yersiz ya da ret gerekliydi. Dağılım `--stats` ile
+görülür.
+
+**NER seti için ölçüt:** (1) her etiketli varlık doğru türde mi, (2) sınırlar doğru mu (birim varlığın içinde, ekler yer adıyla
+birlikte, hızda "saatte" dahil), (3) etiket dışında kalmış sayı/yer/yön/süre var mı, (4) etiketlenmemesi gereken bir şey etiketlenmiş mi.
+Düzeltmede cümlenin kendisi değiştirilemez, yalnızca etiketler (`[metin|ETİKET]`).
+
+## İlerleme, dışa aktarma ve sonraki adım
+```bash
+uv run python -m skymind.data.review --stats      # toplam / ok / edited / bad / pending ve hatalı nedenleri
+uv run python -m skymind.data.review --export     # ok + edited olanlardan data/gold/gold.jsonl üretir
+uv run python -m skymind.data.ner_review --apply  # NER düzeltmelerini ner_manual.txt'ye yazar (yedekli)
+```
+`gold.jsonl` ile SFT ve DPO yeniden ölçüldü (`docs/RESULTS.md`, "Gold alt kümede planlayıcı değerlendirmesi"); atılan aday oranı
+şablon veri kalitesi için ayrı bir göstergedir.

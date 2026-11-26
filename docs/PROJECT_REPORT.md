@@ -113,7 +113,7 @@ Bu projede güvenilir sonuç almak için ölçümlerin kendisini defalarca düze
 |---|---|---|
 | **485 bozuk paraphrase satırı** (`{style, command}` nesneleri metne çevrilmişti) | Veri incelemesi | Ayrıştırıcı düzeltildi, bölümler yeniden üretildi, planlayıcılar yeniden ölçüldü; bulgular değişmedi (alan 0,842/0,850) |
 | **NER'in zayıf etiketleri döngüsel** (BERTurk 0,999, kural tabanlı da 0,994) | Kural taban çizgisinin yüksek çıkması | Bağımsız 40 cümlelik elle set; BERTurk'ün üstünlüğü kanıtlanamadı |
-| **İlk sıkıştırma deneyi kirliydi** (öğrenciler öğretmenin ağırlıklarından başlamış, gecikme ben başka iş yaparken ölçülmüştü) | Deney tasarımı incelemesi | İki aşamaya ayrıldı, kontrol (`teacher-ft1`), 2 tohum, dönüşümlü gecikme |
+| **İlk sıkıştırma deneyi kirliydi** (öğrenciler öğretmenin ağırlıklarından başlamış, gecikmeler arka planda başka iş çalışırken ölçülmüştü) | Deney tasarımı incelemesi | İki aşamaya ayrıldı, kontrol (`teacher-ft1`), 2 tohum, dönüşümlü gecikme |
 | **Sayı denetleyicisi çok gevşek, sonra çok katıydı** | LLM özetlerinde sahte "uydurma" ve gevşek geçişler | Meşru biçim farkları (saat bileşenleri, koordinat parçaları, ay adları) eklendi; **bu düzeltme sonuçlar görüldükten sonra yapıldı** (belgelendi) |
 | **Yük testi komut havuzu veri onarımından sonra değişmişti** | C++ ile Python geçerlilik farkı | C++ yeniden koşuldu; HF ölçümü yeniden yapılmadı (belgelendi) |
 | **C++ vs Python farkı "dil" sanılabilirdi** | Karışıklık analizi | Aynı GGUF/ikili ile ölçüm: dil payı ~%6–7 |
