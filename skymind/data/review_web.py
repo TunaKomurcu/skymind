@@ -47,7 +47,11 @@ class ReviewState:
                     {k: c[k] for k in ("id", "command", "gold", "category")} for c in self.items
                 ],
                 "decisions": {
-                    i: {"status": d["status"], "command": d["command"]}
+                    i: {
+                        "status": d["status"],
+                        "command": d["command"],
+                        "reason": d.get("reason", ""),
+                    }
                     for i, d in self.decisions.items()
                 },
             }
@@ -62,12 +66,35 @@ class ReviewState:
         if not isinstance(command, str) or not command.strip() or len(command) > MAX_COMMAND:
             raise ValueError("geçersiz komut")
         command = command.strip()
-        if status != "bad":  # durumu sunucu belirler: komut değiştiyse edited
+        reason = body.get("reason", "")
+        if reason not in REASON_CODES and reason != "":
+            raise ValueError("geçersiz neden")
+        if (
+            status != "bad"
+        ):  # durumu sunucu belirler: komut değiştiyse edited; neden yalnızca hatalıda
             status = "edited" if command != cand["command"] else "ok"
+            reason = ""
         with self._lock:
-            self.decisions[cand["id"]] = record(cand, status, command, cand["gold"])
+            self.decisions[cand["id"]] = record(cand, status, command, cand["gold"], "", reason)
             save_decisions(self.path, self.decisions)
         return {"saved": cand["id"], "status": status}
+
+    def clear_after(self, body: dict[str, Any]) -> dict[str, Any]:
+        """Verilen adaydan SONRAKİ (sıradaki) tüm kararları siler; önce dosyanın yedeğini alır."""
+        cid = body.get("id")
+        if not isinstance(cid, str) or cid not in self.by_id:
+            raise ValueError("bilinmeyen aday")
+        idx = next(i for i, c in enumerate(self.items) if c["id"] == cid)
+        later = {c["id"] for c in self.items[idx + 1 :]}
+        with self._lock:
+            hit = [i for i in self.decisions if i in later]
+            backup = self.path.with_name(f"{self.path.stem}.bak{self.path.suffix}")
+            if hit and self.path.exists():
+                backup.write_bytes(self.path.read_bytes())  # geri alınabilir olsun
+            for i in hit:
+                del self.decisions[i]
+            save_decisions(self.path, self.decisions)
+        return {"cleared": len(hit), "backup": backup.name}
 
     def reason(self, body: dict[str, Any]) -> dict[str, Any]:
         """ "Hatalı" işaretli adaya isteğe bağlı neden ekler (boş kod nedeni temizler)."""
@@ -137,6 +164,8 @@ def make_handler(state: ReviewState) -> type[BaseHTTPRequestHandler]:
                     return self._json(200, state.undo(body))
                 if self.path == "/api/reason":
                     return self._json(200, state.reason(body))
+                if self.path == "/api/clear_after":
+                    return self._json(200, state.clear_after(body))
             except (ValueError, json.JSONDecodeError) as e:
                 return self._json(HTTPStatus.BAD_REQUEST, {"error": str(e)})
             self._json(HTTPStatus.NOT_FOUND, {"error": "yok"})

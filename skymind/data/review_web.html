@@ -65,6 +65,19 @@
   .rchip { font: inherit; font-size: 13px; font-weight: 500; padding: 5px 10px; border-radius: 99px;
            background: var(--card); color: var(--ink); border: 1px solid var(--line); cursor: pointer; }
   .rchip.on { border-color: var(--bad); background: var(--bad-bg); color: var(--bad); font-weight: 700; }
+  .map { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 12px; }
+  .cell { width: 11px; height: 11px; border-radius: 3px; background: var(--line); cursor: pointer; }
+  .cell.ok { background: var(--ok); } .cell.bad { background: var(--bad); }
+  .cell.cur { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .pos { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .badge { font-size: 13px; font-weight: 700; padding: 2px 10px; border-radius: 99px; margin-left: auto; }
+  .badge.ok { background: var(--ok-bg); color: var(--ok); } .badge.bad { background: var(--bad-bg); color: var(--bad); }
+  .badge.todo { background: var(--line); color: var(--muted); }
+  details.bulk { margin-top: 14px; font-size: 13px; color: var(--muted); }
+  details.bulk button.danger { margin-top: 8px; font-size: 13px; padding: 8px 12px; background: var(--bad-bg);
+    color: var(--bad); border: 1px solid var(--bad); border-radius: 8px; font-weight: 600; }
+  .card + .card { margin-top: 12px; }
 </style>
 </head>
 <body>
@@ -76,8 +89,8 @@
   <div class="bar"><i id="barfill"></i></div>
   <div id="app"></div>
   <div class="help">
-    <kbd>→</kbd>/<kbd>Enter</kbd>/<kbd>D</kbd> doğru &nbsp; <kbd>←</kbd>/<kbd>N</kbd> hatalı &nbsp; <kbd>S</kbd> atla &nbsp;
-    <kbd>Z</kbd> geri al &nbsp; <kbd>E</kbd> komutu düzelt &nbsp; <kbd>J</kbd> ham JSON
+    <kbd>D</kbd>/<kbd>Enter</kbd> doğru &nbsp; <kbd>N</kbd> hatalı &nbsp; <kbd>←</kbd> önceki &nbsp; <kbd>→</kbd> sonraki &nbsp;
+    <kbd>Z</kbd> geri al &nbsp; <kbd>E</kbd> komutu düzelt &nbsp; <kbd>1</kbd>–<kbd>5</kbd> hatalı nedeni &nbsp; <kbd>J</kbd> ham JSON
   </div>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -113,92 +126,132 @@ function renderGold(g) {
   return `<div class="out"><ol>${g.steps.map(s => `<li>${hl(step(s))}</li>`).join("")}</ol></div>`;
 }
 
-let items = [], decisions = {}, skipped = new Set(), history = [], showJson = false, editing = false, editedCmd = null, pending = 0;
-let lastBad = null;   // {id, command, saved: Promise, reason}  son "hatalı" kararın isteğe bağlı nedeni için
+let items = [], decisions = {}, pos = 0, history = [], showJson = false, editing = false, editedCmd = null, pending = 0, lastBad = null;
+const saves = {};   // id -> son kayıt isteği (neden isteği ondan sonra gider)
 const REASONS = {"1":["komut_yapay","komut yapay/anlamsız"], "2":["cikti_komuta_uymuyor","çıktı komuta uymuyor (sayı/yön/yer)"],
   "3":["gereksiz_soru","gereksiz soru (bilgi komutta var)"], "4":["soru_gerekliydi","soru gerekliydi (bilgi eksik)"],
   "5":["ret_hatali","ret yersiz ya da ret gerekliydi"]};
-function reasonStrip() {
-  if (!lastBad) return "";
-  const head = `<b>Hatalı:</b> “${esc(lastBad.command.length > 48 ? lastBad.command.slice(0, 48) + "…" : lastBad.command)}” — neden? <span style="opacity:.7">(isteğe bağlı)</span>`;
-  const chips = Object.entries(REASONS).map(([k, [code, label]]) =>
-    `<button class="rchip${lastBad.reason === code ? " on" : ""}" onclick="setReason('${k}')"><kbd>${k}</kbd> ${esc(label)}</button>`).join("");
-  return `<div class="reasons">${head}<div class="rchips">${chips}</div></div>`;
-}
-function setReason(k) {
-  if (!lastBad || !REASONS[k]) return;
-  const code = REASONS[k][0], b = lastBad;
-  b.reason = b.reason === code ? "" : code;   // aynı tuşa tekrar basmak temizler
-  draw();
-  b.saved.then(() => api("/api/reason", {id: b.id, reason: b.reason}))
-    .catch(e => toast("NEDEN KAYDEDİLEMEDİ: " + e.message, true));
-}
-
+const reasonLabel = code => (Object.values(REASONS).find(r => r[0] === code) || [0, code])[1];
 const $ = id => document.getElementById(id);
 function toast(msg, err) { const t = $("toast"); t.textContent = msg; t.className = "toast" + (err ? " err" : ""); t.hidden = false;
-  clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, err ? 8000 : 900); }
-
+  clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, err ? 8000 : 1200); }
 async function api(path, body) {
   const r = await fetch(path, body ? {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)} : {});
   if (!r.ok) throw new Error(path + " → " + r.status);
   return r.json();
 }
-const current = () => items.find(c => !decisions[c.id] && !skipped.has(c.id));
-
+const cur = () => items[pos];
 function counts() {
   const c = {ok:0, edited:0, bad:0};
   Object.values(decisions).forEach(d => { if (c[d.status] !== undefined) c[d.status]++; });
   return c;
 }
+function firstUndecided(from) {
+  for (let i = 0; i < items.length; i++) { const j = (from + i) % items.length; if (!decisions[items[j].id]) return j; }
+  return -1;
+}
+function reasonTarget() {
+  const c = cur();
+  if (c && decisions[c.id] && decisions[c.id].status === "bad") return c.id;   // bakılan kart zaten hatalıysa onun nedeni
+  return lastBad;                                                               // yoksa az önce hatalı işaretlenen
+}
+function reasonStrip() {
+  const id = reasonTarget(); if (!id || !decisions[id]) return "";
+  const d = decisions[id];
+  const cmd = d.command.length > 48 ? d.command.slice(0, 48) + "…" : d.command;
+  const chips = Object.entries(REASONS).map(([k, [code, label]]) =>
+    `<button class="rchip${d.reason === code ? " on" : ""}" onclick="setReason('${k}')"><kbd>${k}</kbd> ${esc(label)}</button>`).join("");
+  return `<div class="reasons"><b>Hatalı:</b> “${esc(cmd)}” — neden? <span style="opacity:.7">(isteğe bağlı)</span><div class="rchips">${chips}</div></div>`;
+}
+function setReason(k) {
+  const id = reasonTarget(); if (!id || !REASONS[k] || !decisions[id]) return;
+  const d = decisions[id], code = REASONS[k][0];
+  d.reason = d.reason === code ? "" : code;   // aynı tuşa tekrar basmak temizler
+  draw();
+  (saves[id] || Promise.resolve()).then(() => api("/api/reason", {id, reason: d.reason}))
+    .catch(e => toast("NEDEN KAYDEDİLEMEDİ: " + e.message, true));
+}
+function mapHtml() {
+  return `<div class="map">` + items.map((c, i) => {
+    const d = decisions[c.id], cls = !d ? "todo" : d.status === "bad" ? "bad" : "ok";
+    return `<i class="cell ${cls}${i === pos ? " cur" : ""}" title="${i + 1}. ${esc(c.command.slice(0, 50))}" onclick="go(${i})"></i>`;
+  }).join("") + `</div>`;
+}
 function draw() {
-  const c = counts(), done = c.ok + c.edited + c.bad;
+  const c = counts(), done = c.ok + c.edited + c.bad, cand = cur();
   $("stats").innerHTML = `<b>${done}</b> / ${items.length} &nbsp;·&nbsp; ✓ <b>${c.ok + c.edited}</b> &nbsp; ✗ <b>${c.bad}</b>` +
-    (c.edited ? ` &nbsp; ✎ <b>${c.edited}</b>` : "") + (skipped.size ? ` &nbsp; ⤼ <b>${skipped.size}</b>` : "");
+    (c.edited ? ` &nbsp; ✎ <b>${c.edited}</b>` : "");
   $("barfill").style.width = (items.length ? 100 * done / items.length : 0) + "%";
-  let cand = current();
-  if (!cand && skipped.size) { skipped.clear(); cand = current(); }
-  if (!cand) {
-    $("app").innerHTML = `<div class="card done"><h2>Hepsi bitti 🎉</h2><p>${done} aday incelendi: ${c.ok + c.edited} doğru, ${c.bad} hatalı.</p>
-      <p>Terminalde <code>Ctrl+C</code> ile sunucuyu kapat, sonra:<br><code>uv run python -m skymind.data.review --export</code></p></div>`;
-    return;
-  }
-  const cmd = editedCmd ?? cand.command;
+  if (!cand) { $("app").innerHTML = `<div class="card">Aday yok.</div>`; return; }
+  const d = decisions[cand.id];
+  const badge = !d ? `<span class="badge todo">henüz karar yok</span>`
+    : d.status === "bad" ? `<span class="badge bad">✗ hatalı${d.reason ? " · " + esc(reasonLabel(d.reason)) : ""}</span>`
+    : `<span class="badge ok">✓ doğru${d.status === "edited" ? " (komut düzeltildi)" : ""}</span>`;
+  const shown = editedCmd ?? (d ? d.command : cand.command);
   const cmdHtml = editing
-    ? `<input class="cmdinput" id="cmdinput" value="${esc(cmd)}" autocomplete="off">`
-    : `<p class="cmd ${editedCmd !== null ? "edited" : ""}">${hl(cmd)}</p>`;
-  $("app").innerHTML = `<div class="card">
-    <span class="chip ${cand.category}">${cand.category === "plan" ? "plan" : cand.category === "clarification" ? "netleştirme sorusu" : "ret"}</span>
-    <div class="label">Komut</div>${cmdHtml}
-    <div class="label">Sistemin vermesi gereken çıktı</div>${renderGold(cand.gold)}
-    ${showJson ? `<pre>${esc(JSON.stringify(cand.gold, null, 2))}</pre>` : ""}
-    <div class="btns">
-      <button class="wrong" onclick="decide('bad')">✗ Hatalı<small>← / N</small></button>
-      <button class="good" onclick="decide('ok')">✓ Doğru<small>→ / Enter / D</small></button>
-    </div>
-    <div class="sub"><button onclick="skip()">Atla (S)</button><button onclick="undo()">Geri al (Z)</button>
-      <button onclick="startEdit()">Komutu düzelt (E)</button><button onclick="showJson=!showJson;draw()">Ham JSON (J)</button></div>
-  </div>${reasonStrip()}`;
+    ? `<input class="cmdinput" id="cmdinput" value="${esc(shown)}" autocomplete="off">`
+    : `<p class="cmd ${shown !== cand.command ? "edited" : ""}">${hl(shown)}</p>`;
+  const allDone = firstUndecided(0) === -1;
+  const after = items.slice(pos + 1).filter(x => decisions[x.id]).length;
+  $("app").innerHTML = `${mapHtml()}
+    ${allDone ? `<div class="card done">Hepsi incelendi 🎉 Terminalde <code>Ctrl+C</code>, sonra <code>uv run python -m skymind.data.review --export</code></div>` : ""}
+    <div class="card">
+      <div class="top"><span class="chip ${cand.category}">${cand.category === "plan" ? "plan" : cand.category === "clarification" ? "netleştirme sorusu" : "ret"}</span>
+        <span class="pos">${pos + 1} / ${items.length}</span>${badge}</div>
+      <div class="label">Komut</div>${cmdHtml}
+      <div class="label">Sistemin vermesi gereken çıktı</div>${renderGold(cand.gold)}
+      ${showJson ? `<pre>${esc(JSON.stringify(cand.gold, null, 2))}</pre>` : ""}
+      <div class="btns">
+        <button class="wrong" onclick="decide('bad')">✗ Hatalı<small>N</small></button>
+        <button class="good" onclick="decide('ok')">✓ Doğru<small>D / Enter</small></button>
+      </div>
+      <div class="sub"><button onclick="step_(-1)">← Önceki</button><button onclick="step_(1)">Sonraki →</button>
+        <button onclick="undo()">Geri al (Z)</button><button onclick="startEdit()">Komutu düzelt (E)</button>
+        <button onclick="showJson=!showJson;draw()">Ham JSON (J)</button></div>
+      <details class="bulk"><summary>Toplu düzeltme</summary>
+        <button class="danger" onclick="clearAfter()">Bu karttan SONRAKİ ${after} kararı sil (yedek alınır)</button></details>
+    </div>${reasonStrip()}`;
   if (editing) { const i = $("cmdinput"); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }
 }
+function go(i) { pos = Math.max(0, Math.min(items.length - 1, i)); lastBad = null; editedCmd = null; editing = false; draw(); }
+function step_(n) { go(pos + n); }
 function decide(kind) {
-  const cand = current(); if (!cand) return;
-  const command = editedCmd ?? cand.command;
+  const cand = cur(); if (!cand) return;
+  const prev = decisions[cand.id] || null;
+  const command = editedCmd ?? (prev ? prev.command : cand.command);
   const status = kind === "bad" ? "bad" : (command !== cand.command ? "edited" : "ok");
-  decisions[cand.id] = {status, command}; history.push(cand.id); editedCmd = null; editing = false;
+  const reason = status === "bad" && prev && prev.status === "bad" ? (prev.reason || "") : "";
+  history.push({id: cand.id, prev: prev ? {...prev} : null});
+  decisions[cand.id] = {status, command, reason};
   pending++;
-  const saved = api("/api/decide", {id: cand.id, status, command});
+  const saved = api("/api/decide", {id: cand.id, status, command, reason});
+  saves[cand.id] = saved;
   saved.then(() => { pending--; toast("kaydedildi ✓"); })
     .catch(e => { pending--; toast("KAYIT BAŞARISIZ: " + e.message + " (sunucu çalışıyor mu?)", true); });
-  lastBad = status === "bad" ? {id: cand.id, command, saved, reason: ""} : null;
+  lastBad = status === "bad" ? cand.id : null;
+  editedCmd = null; editing = false;
+  // sınırda ilerliyorsan sıradaki karar bekleyene, geçmişi düzeltiyorsan bir sonraki karta geç
+  const nxt = prev ? Math.min(pos + 1, items.length - 1) : firstUndecided(pos + 1);
+  pos = nxt >= 0 ? nxt : pos;
   draw();
 }
-function skip() { const c = current(); if (!c) return; skipped.add(c.id); editedCmd = null; editing = false; lastBad = null; draw(); }
 function undo() {
-  const id = history.pop(); if (!id) { toast("geri alınacak karar yok"); return; }
-  delete decisions[id]; skipped.delete(id); editedCmd = null; editing = false; lastBad = null;
-  // geri alınan aday sıranın en başına dönsün: atlananlar listesine koymadan, ilk bekleyen o olacak
-  const idx = items.findIndex(c => c.id === id); const [it] = items.splice(idx, 1); items.unshift(it);
-  draw(); api("/api/undo", {id}).catch(e => toast("GERİ ALMA BAŞARISIZ: " + e.message, true));
+  const h = history.pop();
+  if (!h) { toast("bu oturumda geri alınacak karar yok; ← ile karta gidip yeniden karar verebilirsin"); return; }
+  if (h.prev) { decisions[h.id] = h.prev; saves[h.id] = api("/api/decide", {id: h.id, status: h.prev.status, command: h.prev.command, reason: h.prev.reason || ""}); }
+  else { delete decisions[h.id]; saves[h.id] = api("/api/undo", {id: h.id}); }
+  saves[h.id].catch(e => toast("GERİ ALMA BAŞARISIZ: " + e.message, true));
+  pos = items.findIndex(c => c.id === h.id); lastBad = null; editedCmd = null; editing = false;
+  draw(); toast("geri alındı");
+}
+function clearAfter() {
+  const cand = cur(), later = items.slice(pos + 1).filter(x => decisions[x.id]);
+  if (!later.length) { toast("bu karttan sonra silinecek karar yok"); return; }
+  if (!confirm(`${pos + 1}. karttan SONRAKİ ${later.length} kararın hepsi silinecek (yedek alınır). Emin misin?`)) return;
+  api("/api/clear_after", {id: cand.id}).then(r => {
+    items.slice(pos + 1).forEach(c => delete decisions[c.id]); history = []; lastBad = null;
+    toast(`${r.cleared} karar silindi (yedek: ${r.backup})`); draw();
+  }).catch(e => toast("SİLME BAŞARISIZ: " + e.message, true));
 }
 function startEdit() { editing = true; draw(); }
 
@@ -210,9 +263,10 @@ document.addEventListener("keydown", e => {
     return;
   }
   const k = e.key.toLowerCase();
-  if (k === "arrowright" || k === "enter" || k === "d") { e.preventDefault(); decide("ok"); }
-  else if (k === "arrowleft" || k === "n" || k === "x") { e.preventDefault(); decide("bad"); }
-  else if (k === "s") skip();
+  if (k === "enter" || k === "d") { e.preventDefault(); decide("ok"); }
+  else if (k === "n" || k === "x") { e.preventDefault(); decide("bad"); }
+  else if (k === "arrowright" || k === "s") { e.preventDefault(); step_(1); }
+  else if (k === "arrowleft") { e.preventDefault(); step_(-1); }
   else if (k === "z" || k === "backspace") { e.preventDefault(); undo(); }
   else if (k === "e") { e.preventDefault(); startEdit(); }
   else if (k === "j") { showJson = !showJson; draw(); }
@@ -220,7 +274,7 @@ document.addEventListener("keydown", e => {
 });
 window.addEventListener("beforeunload", e => { if (pending > 0) { e.preventDefault(); e.returnValue = ""; } });
 
-api("/api/state").then(s => { items = s.items; decisions = s.decisions; draw(); })
+api("/api/state").then(s => { items = s.items; decisions = s.decisions; const f = firstUndecided(0); pos = f >= 0 ? f : 0; draw(); })
   .catch(e => { $("app").innerHTML = `<div class="card">Sunucuya bağlanılamadı: ${esc(e.message)}</div>`; });
 </script>
 </body>

@@ -120,3 +120,48 @@ def test_reason_can_be_added_to_a_bad_decision_only_and_is_validated(
         {"id": "yok", "reason": "gereksiz_soru"},
     ):
         assert call(base + "/api/reason", body)[0] == 400
+
+
+def test_decide_keeps_reason_only_for_bad_and_snapshot_returns_it(
+    server: tuple[str, ReviewState, Path],
+) -> None:
+    base, state, dec = server
+    a, b = state.items[0], state.items[1]
+    call(
+        base + "/api/decide",
+        {"id": a["id"], "status": "bad", "command": a["command"], "reason": "gereksiz_soru"},
+    )
+    call(
+        base + "/api/decide",
+        {"id": b["id"], "status": "ok", "command": b["command"], "reason": "gereksiz_soru"},
+    )
+    saved = review.load_decisions(dec)
+    assert saved[a["id"]]["reason"] == "gereksiz_soru" and saved[b["id"]]["reason"] == ""
+    snap = call(base + "/api/state")[1]["decisions"]
+    assert snap[a["id"]]["reason"] == "gereksiz_soru"
+    assert (
+        call(
+            base + "/api/decide",
+            {"id": a["id"], "status": "bad", "command": "x", "reason": "uydurma"},
+        )[0]
+        == 400
+    )
+
+
+def test_clear_after_removes_only_later_decisions_and_keeps_a_backup(
+    server: tuple[str, ReviewState, Path],
+) -> None:
+    base, state, dec = server
+    for it in state.items:  # üçünü de hatalı işaretle (yanlışlıkla toplu hata senaryosu)
+        call(base + "/api/decide", {"id": it["id"], "status": "bad", "command": it["command"]})
+    first = state.items[0]
+    s, out = call(base + "/api/clear_after", {"id": first["id"]})
+    assert s == 200 and out["cleared"] == 2 and out["backup"] == "d.bak.jsonl"
+    assert set(review.load_decisions(dec)) == {first["id"]}  # öncekiler korunur
+    backup = dec.with_name("d.bak.jsonl")
+    assert len(review.load_decisions(backup)) == 3  # yedek silmeden önceki hali
+    # silinecek karar kalmadıysa yedek yenilenmez ve 0 döner
+    backup.unlink()
+    assert call(base + "/api/clear_after", {"id": first["id"]})[1]["cleared"] == 0
+    assert not backup.exists()
+    assert call(base + "/api/clear_after", {"id": "yok"})[0] == 400
