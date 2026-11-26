@@ -1,0 +1,40 @@
+{"id": "74891005ae", "status": "ok", "markup": "Lütfen [1500 metre|ALT] irtifaya çık.", "section": "KOLAY", "ts": 1795656725}
+{"id": "94168a1e24", "status": "ok", "markup": "[kuzeye|DIR] [2 km|DIST] ilerle.", "section": "KOLAY", "ts": 1795656725}
+{"id": "2c6676185d", "status": "ok", "markup": "[Alfa noktasına|PLACE] git ve [200 m|ALT] irtifada bekle.", "section": "KOLAY", "ts": 1795656726}
+{"id": "76b0a0511f", "status": "ok", "markup": "[baraj|PLACE] bölgesini [3 km|RADIUS] yarıçapta [500 metre|ALT] yükseklikte tara.", "section": "KOLAY", "ts": 1795656726}
+{"id": "65bc017107", "status": "ok", "markup": "Hızı [15 m/s|SPEED] yap.", "section": "KOLAY", "ts": 1795656726}
+{"id": "e641f308b3", "status": "ok", "markup": "[güneydoğuya|DIR] [1000 metre|DIST] git.", "section": "KOLAY", "ts": 1795656727}
+{"id": "1edcbb9b5c", "status": "ok", "markup": "[liman|PLACE] üzerinde [10 dakika|DUR] bekle, irtifa [300 m|ALT].", "section": "KOLAY", "ts": 1795656727}
+{"id": "47bdb027d0", "status": "ok", "markup": "[38.5|COORD] enlem [35.2|COORD] boylam noktasına git.", "section": "KOLAY", "ts": 1795656727}
+{"id": "1e451f60b0", "status": "ok", "markup": "[köprü|PLACE] ve [pist|PLACE] arasında [250 m|ALT] irtifada devriye at.", "section": "KOLAY", "ts": 1795656727}
+{"id": "afd7b00ea7", "status": "ok", "markup": "Şimdi [2 kilometre|ALT] irtifaya yüksel.", "section": "KOLAY", "ts": 1795656727}
+{"id": "9814c6a95a", "status": "ok", "markup": "[güneye|DIR] [3 km|DIST] ilerle ve bekle.", "section": "KOLAY", "ts": 1795656727}
+{"id": "07898df3ef", "status": "ok", "markup": "[piste|PLACE] in.", "section": "KOLAY", "ts": 1795656728}
+{"id": "e369348e89", "status": "ok", "markup": "[radar tepesine|PLACE] git, [400 m|ALT] irtifada.", "section": "KOLAY", "ts": 1795656728}
+{"id": "7586c1543b", "status": "ok", "markup": "[depoyu|PLACE] [2000 m|RADIUS] yarıçapta [1000 m|ALT] irtifada tara.", "section": "KOLAY", "ts": 1795656728}
+{"id": "01f735a194", "status": "ok", "markup": "Hızı [10 m/s|SPEED] yap lütfen.", "section": "KOLAY", "ts": 1795656728}
+{"id": "2e3f0d7125", "status": "ok", "markup": "[kuzeydoğuya|DIR] git.", "section": "KOLAY", "ts": 1795656728}
+{"id": "a7a96d2f31", "status": "ok", "markup": "[baraja|PLACE] [kuzeyden|DIR] yaklaş.", "section": "KOLAY", "ts": 1795656728}
+{"id": "4f6c9b57d8", "status": "ok", "markup": "[15 dakika|DUR] [köprü|PLACE] üzerinde bekle.", "section": "KOLAY", "ts": 1795656728}
+{"id": "7b78975a03", "status": "ok", "markup": "[Bravo noktasına|PLACE] [100 metre|ALT] irtifada git.", "section": "KOLAY", "ts": 1795656729}
+{"id": "1ca4ffb682", "status": "ok", "markup": "[doğuda|DIR] [1500 m|DIST] mesafedeki noktayı [800 m|RADIUS] yarıçapla tara, irtifa [600 m|ALT].", "section": "KOLAY", "ts": 1795656729}
+{"id": "abbc01ca0f", "status": "ok", "markup": "[bin beş yüz metre|ALT] irtifaya kalk.", "section": "ZOR", "ts": 1795656729}
+{"id": "e9a793fa04", "status": "ok", "markup": "[yüz elli metre|ALT] yükseklikte [hastane|PLACE] üzerinde dön.", "section": "ZOR", "ts": 1795656729}
+{"id": "f94235bb71", "status": "ok", "markup": "Hızını [saatte 72 kilometre|SPEED] yap.", "section": "ZOR", "ts": 1795656729}
+{"id": "c0157c0caf", "status": "ok", "markup": "[kuzeybatıya|DIR] [500 m|DIST] git sonra [depoya|PLACE] in.", "section": "ZOR", "ts": 1795656729}
+{"id": "4fd20f2e4d", "status": "ok", "markup": "[5 km|RADIUS] yarıçapla [orman sahasını|PLACE] tara, irtifa [1000 m|ALT].", "section": "ZOR", "ts": 1795656730}
+{"id": "3d2b4c68b4", "status": "ok", "markup": "[Charlie noktası|PLACE] çevresinde [20 dk|DUR] daire çiz.", "section": "ZOR", "ts": 1795656730}
+{"id": "4ec261bca2", "status": "ok", "markup": "[2,5 km|ALT] yükseğe çık.", "section": "ZOR", "ts": 1795656730}
+{"id": "9d4f1cfbed", "status": "ok", "markup": "[40.12|COORD], [29.77|COORD] koordinatına uç.", "section": "ZOR", "ts": 1795656730}
+{"id": "9c52b35e6b", "status": "ok", "markup": "[stadyuma|PLACE] kadar git.", "section": "ZOR", "ts": 1795656730}
+{"id": "62497265cd", "status": "ok", "markup": "Hızı [20 m/sn|SPEED] ayarla.", "section": "ZOR", "ts": 1795656730}
+{"id": "3d77ba23b1", "status": "ok", "markup": "[havaalanı|PLACE] üzerinde [3000 ft|ALT] irtifada bekle.", "section": "ZOR", "ts": 1795656731}
+{"id": "3a4a1bff64", "status": "ok", "markup": "Önce [500 m|ALT] irtifaya çık sonra [güneye|DIR] dön ve [Bravo noktasına|PLACE] ulaş.", "section": "ZOR", "ts": 1795656731}
+{"id": "d903d4b14f", "status": "ok", "markup": "[yarım saat|DUR] boyunca [liman|PLACE] bölgesinde bekle.", "section": "ZOR", "ts": 1795656731}
+{"id": "0ce9e27344", "status": "ok", "markup": "[750 m|ALT] irtifada [sınır karakoluna|PLACE] doğru uç.", "section": "ZOR", "ts": 1795656731}
+{"id": "d1b867c1bf", "status": "ok", "markup": "[Alfa|PLACE] ve [Bravo|PLACE] noktaları arasında devriye at, irtifa [300 metre|ALT].", "section": "ZOR", "ts": 1795656732}
+{"id": "d17de7d2aa", "status": "ok", "markup": "[batıya|DIR] [10 km|DIST] gidip [limana|PLACE] in.", "section": "ZOR", "ts": 1795656732}
+{"id": "ba28959dd1", "status": "ok", "markup": "Hızı [35 m/s|SPEED] yapıp [doğu|DIR] yönünde ilerle.", "section": "ZOR", "ts": 1795656732}
+{"id": "756c121fbd", "status": "ok", "markup": "[1 saat|DUR] daire çiz [barajın|PLACE] üzerinde [1200 m|ALT] yükseklikte.", "section": "ZOR", "ts": 1795656733}
+{"id": "4feb910ee4", "status": "ok", "markup": "Merkez [41.01|COORD] [28.97|COORD] olacak şekilde [4 km|RADIUS] yarıçapta tara.", "section": "ZOR", "ts": 1795656733}
+{"id": "da74d477f5", "status": "ok", "markup": "[iki bin metre|ALT] irtifada [kuzeye|DIR] [bir kilometre|DIST] git.", "section": "ZOR", "ts": 1795656734}

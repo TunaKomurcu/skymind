@@ -51,9 +51,9 @@ Kısıtlar: **ücretsiz** araçlar, RTX 4060 Laptop (8 GB VRAM), 32 GB RAM, yaln
 
 ## Sprint 3b (Faz 2)
 - [x] Niyet (10 sınıf) ve NER (8 tür): TF-IDF/kural taban çizgileri, BERTurk ince ayar
-- [x] Zayıf NER etiketlerinin döngüselliği tespit edildi; bağımsız 40 cümlelik elle set (Claude yazdı, sahibi gözden geçirmedi)
+- [x] Zayıf NER etiketlerinin döngüselliği tespit edildi; bağımsız 40 cümlelik elle set (Claude yazdı, proje sahibi 40/40 inceledi)
 - [x] Paraphrase veri hatası bulundu, düzeltildi, planlayıcılar yeniden ölçüldü (bulgu değişmedi)
-- [ ] NER elle setini proje sahibinin gözden geçirmesi
+- [x] NER elle setini proje sahibi inceledi (40/40 doğru, düzeltme yok)
 
 ## Sprint 5 (Faz 5)
 - [x] Kurgusal kılavuz + soru seti, BM25 (+F5 kök), e5-small dense, RRF hibrit, 8 tohumlu ölçüm

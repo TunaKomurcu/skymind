@@ -143,6 +143,6 @@ gerçek Kubernetes kümesi + yük altında otomatik ölçekleme · Jetson/ARM ö
 ## 8. Kaynaklar ve şeffaflık
 - **Hesaplama:** tek RTX 4060 Laptop; OpenRouter harcaması toplam ~0,22 USD (4 USD sert tavan, istemci tarafı defter ve önbellek).
 - **Geliştirme yöntemi:** Proje, **Claude Code** (Anthropic) ile birlikte geliştirildi: kod, deneyler ve belgeler birlikte yazıldı (commit'lerde
-  `Co-Authored-By` satırı). İnsan gözden geçirmesi: altın küme (300, proje sahibi, web arayüzü kayıtları `data/gold/gold_reviewed.jsonl`).
-  NER elle seti için inceleme kaydı: `data/gold/ner_manual_reviewed.jsonl` (kayıt durumu için dosyaya bakın).
+  `Co-Authored-By` satırı). İnsan gözden geçirmesi (proje sahibi, web arayüzü kayıtlarıyla): altın küme 300/300 (`data/gold/gold_reviewed.jsonl`),
+  NER elle seti 40/40 (`data/gold/ner_manual_reviewed.jsonl`); ikisinde de hata bulunmadı.
 - **Lisanslar:** modeller (Qwen2.5, BERTurk, e5, Gemma-3) ve kütüphaneler kendi lisanslarına tabidir; ağırlıklar bu repoda yoktur.

@@ -295,7 +295,7 @@ doğruluktaki 2.4 puanlık fark yönü gösterir, aralığı değil.
    sayı, birimsiz süre/mesafe, kenarda noktalama) 40 cümlede 0 sorun buldu. Model ya da kuralın ürettiği ama elle
    etiketlenmemiş tek varlık, yazıyla sayıların parçalanmış parçalarıdır (etiket hatası ipucu değil).
 3. n=20/20 küçük: tek varlık hatası mikro-F1'i ~1–2 puan oynatır. Elle set eğitim verisinden bağımsız ama
-   **Claude (asistan) tarafından yazıldı**, proje sahibi gözden geçirmedi; üslup önyargısı olabilir.
+   **Claude (asistan) tarafından yazıldı**, proje sahibi 40/40 cümleyi inceledi (hepsi doğru, düzeltme yok; kayıt `data/gold/ner_manual_reviewed.jsonl`); üslup önyargısı ve ortak kör nokta olasılığı sürer.
 
 ## Veri hatası ve düzeltmesi
 Paraphrase üretiminde `{style, command}` nesneleri metne çevrilmişti (485 satır bozuk). Ayrıştırıcı

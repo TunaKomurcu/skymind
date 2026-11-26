@@ -150,11 +150,11 @@ Dosya dosya açıklama ve çalıştırma komutları: [`docs/REPO_GUIDE.md`](docs
 * **Tek eğitim tohumu** (SFT, DPO): farklar bu iki modelin farkıdır, yöntemlerin genel farkı değil.
 * **Kubernetes manifest'leri hiçbir kümeye uygulanmadı** (yalnızca yapısal testler). Podman compose yığını çalıştırıldı (CPU, tek istek).
 * **Yapılmayanlar:** constrained decoding, LLM damıtma, ONNX Runtime C++ motoru, gRPC, AWQ/GPTQ, ARM/Jetson ölçümü.
-* NER elle seti (40 cümle) asistan tarafından yazıldı; atıf geçerliliği ölçüsü desteklenmeyi göstermez.
+* NER elle seti (40 cümle) Claude tarafından yazıldı, proje sahibi 40/40 inceledi (hepsi doğru); yine de aynı yazarın ürünü olduğundan ortak kör nokta olasılığı var. Atıf geçerliliği ölçüsü desteklenmeyi göstermez.
 * Operasyonel güvenlik iddiası yoktur; uçuş uygunluk eşikleri prototip değerleridir.
 
 ## Şeffaflık
 
 Proje, **Claude Code** (Anthropic) ile birlikte geliştirildi: kod, deneyler ve belgeler birlikte yazıldı (commit'lerde `Co-Authored-By` satırı).
-İnsan doğrulaması: altın küme (300, proje sahibi). Dış hizmet: yalnızca OpenRouter (~0,22 USD). Modeller ve kütüphaneler kendi lisanslarına tabidir;
+İnsan doğrulaması (proje sahibi): altın küme 300/300, NER elle seti 40/40. Dış hizmet: yalnızca OpenRouter (~0,22 USD). Modeller ve kütüphaneler kendi lisanslarına tabidir;
 model ağırlıkları bu repoda yoktur.

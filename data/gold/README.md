@@ -51,3 +51,9 @@ uv run python -m skymind.data.review --export   # gold.jsonl üret
 uv run --extra train python -m skymind.planner.evaluate --name sft-v1-gold --adapter outputs/sft-v1/adapter \
     --data data/gold/gold.jsonl --limit 0
 ```
+
+## NER elle sınama seti (`ner_manual.txt`, 40 cümle)
+Altın kümeden ayrı, **farklı bir görevin** (varlık çıkarımı) bağımsız sınama seti: 20 KOLAY (şablona yakın) + 20 ZOR (şablon dışı: yazıyla sayılar,
+`dk`/`ft`/`m/sn`, görülmemiş yer adları). Cümleleri ve `[metin|ETİKET]` işaretlemelerini Claude yazdı; proje sahibi 40/40 inceledi, hepsi doğru,
+düzeltme yok (`ner_manual_reviewed.jsonl`). Claude 3 cümleyi etiket **sınırı** açısından gri işaretledi (`ner_claude_notes.json`). Ek mekanik
+kontroller (etiket dışı sayı, birimsiz süre, kenar noktalama) 0 sorun buldu. Aynı yazarın ürünü olduğu için ortak kör nokta olasılığı sürer.
