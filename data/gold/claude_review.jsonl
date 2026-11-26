@@ -53,7 +53,7 @@
 {"id": "c083e0e13f94", "pos": 53, "verdict": "ok", "flag": false, "note": ""}
 {"id": "1aef1aafe3b5", "pos": 54, "verdict": "ok", "flag": false, "note": ""}
 {"id": "3e247ed5b09e", "pos": 55, "verdict": "ok", "flag": false, "note": ""}
-{"id": "941808fb0dfe", "pos": 56, "verdict": "ok", "flag": false, "note": ""}
+{"id": "941808fb0dfe", "pos": 56, "verdict": "ok", "flag": true, "note": "Tartışmalı: yalnızca yön var, mesafe yok ('kuzeye ilerle'). Şema mesafeyi isteğe bağlı bıraktığı için plan olarak etiketlendi; ama 'ne kadar?' diye sormak da savunulabilir. 'Havada kal' (yer yok) kartlarını tartışmalı saydığım halde bunları ilk turda işaretlememiştim: tutarsızlık."}
 {"id": "a4f995d6b146", "pos": 57, "verdict": "ok", "flag": false, "note": ""}
 {"id": "8a0e8bed0d6d", "pos": 58, "verdict": "ok", "flag": false, "note": ""}
 {"id": "0a1300b78c75", "pos": 59, "verdict": "ok", "flag": false, "note": ""}
@@ -104,7 +104,7 @@
 {"id": "cf0f4f594689", "pos": 104, "verdict": "ok", "flag": false, "note": ""}
 {"id": "62709c6bf5b2", "pos": 105, "verdict": "ok", "flag": false, "note": ""}
 {"id": "9be1a191b169", "pos": 106, "verdict": "ok", "flag": false, "note": ""}
-{"id": "e2a881b4b62e", "pos": 107, "verdict": "ok", "flag": false, "note": ""}
+{"id": "e2a881b4b62e", "pos": 107, "verdict": "ok", "flag": true, "note": "Tartışmalı: yalnızca yön var, mesafe yok ('kuzeye ilerle'). Şema mesafeyi isteğe bağlı bıraktığı için plan olarak etiketlendi; ama 'ne kadar?' diye sormak da savunulabilir. 'Havada kal' (yer yok) kartlarını tartışmalı saydığım halde bunları ilk turda işaretlememiştim: tutarsızlık."}
 {"id": "cf1a7e0d5a0f", "pos": 108, "verdict": "ok", "flag": false, "note": ""}
 {"id": "2911d4006f1c", "pos": 109, "verdict": "ok", "flag": false, "note": ""}
 {"id": "a19c6ac869f8", "pos": 110, "verdict": "ok", "flag": false, "note": ""}
@@ -158,7 +158,7 @@
 {"id": "d82ac7e19c28", "pos": 158, "verdict": "ok", "flag": false, "note": ""}
 {"id": "1610e4596ee0", "pos": 159, "verdict": "ok", "flag": false, "note": ""}
 {"id": "0aaa7d158ed2", "pos": 160, "verdict": "ok", "flag": false, "note": ""}
-{"id": "c712531b4f66", "pos": 161, "verdict": "ok", "flag": false, "note": ""}
+{"id": "c712531b4f66", "pos": 161, "verdict": "ok", "flag": true, "note": "Tartışmalı: yalnızca yön var, mesafe yok ('kuzeye ilerle'). Şema mesafeyi isteğe bağlı bıraktığı için plan olarak etiketlendi; ama 'ne kadar?' diye sormak da savunulabilir. 'Havada kal' (yer yok) kartlarını tartışmalı saydığım halde bunları ilk turda işaretlememiştim: tutarsızlık."}
 {"id": "228ecfa3ed79", "pos": 162, "verdict": "ok", "flag": false, "note": ""}
 {"id": "737d5add922c", "pos": 163, "verdict": "ok", "flag": false, "note": ""}
 {"id": "9ca7c251b208", "pos": 164, "verdict": "ok", "flag": false, "note": ""}
@@ -177,7 +177,7 @@
 {"id": "42b76780fdb3", "pos": 177, "verdict": "ok", "flag": false, "note": ""}
 {"id": "ae04b6da9f94", "pos": 178, "verdict": "ok", "flag": false, "note": ""}
 {"id": "b6435fe2e9be", "pos": 179, "verdict": "ok", "flag": false, "note": ""}
-{"id": "b9bd97184dcc", "pos": 180, "verdict": "ok", "flag": false, "note": ""}
+{"id": "b9bd97184dcc", "pos": 180, "verdict": "ok", "flag": true, "note": "Tartışmalı: yalnızca yön var, mesafe yok ('kuzeye ilerle'). Şema mesafeyi isteğe bağlı bıraktığı için plan olarak etiketlendi; ama 'ne kadar?' diye sormak da savunulabilir. 'Havada kal' (yer yok) kartlarını tartışmalı saydığım halde bunları ilk turda işaretlememiştim: tutarsızlık."}
 {"id": "c6c082c8f83a", "pos": 181, "verdict": "ok", "flag": false, "note": ""}
 {"id": "5cce3d2b473b", "pos": 182, "verdict": "ok", "flag": false, "note": ""}
 {"id": "318339773b50", "pos": 183, "verdict": "ok", "flag": false, "note": ""}
