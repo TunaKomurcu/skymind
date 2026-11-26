@@ -51,7 +51,7 @@ farkı içindir; alan doğruluğu gibi metrikler için gold etiket gerekir ve ca
   panodaki 12 sorgunun hepsi canlı Prometheus'ta hatasız çalıştı. Bu çalıştırmada bir pano hatası bulundu ve
   düzeltildi: hiç geçersiz çıktı yokken iki "geçersiz çıktı oranı" paneli boş kalıyordu (`or vector(0)`).
 - **Linux C++ derlemesi:** CI'ın `cpp` işiyle aynı komutlar (gcc 13.3, CMake 3.28) WSL'de çalıştırıldı:
-  15/15 GoogleTest geçti. GitHub Actions'ın kendisi çalıştırılmadı (repo uzak sunucuda değil).
+  15/15 GoogleTest geçti. Aynı işler sonradan **GitHub Actions'ta da yeşil** koştu (Ubuntu runner: `cpp` 37 sn, `python` 42 sn).
 - **Sınırlar:** tek istek denendi (CPU'da 38 token ~12 sn, düşük öncelik ve iki konteyner altında; bir
   hız ölçümü değildir). GPU'lu imaj yok; yalnızca CPU yolu. Pano panellerinin *görsel* doğruluğuna
   bakılmadı, yalnızca sorguların çalıştığı doğrulandı. Grafana'ya tarayıcıdan girilmedi.

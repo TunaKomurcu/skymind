@@ -47,7 +47,7 @@ Kısıtlar: **ücretsiz** araçlar, RTX 4060 Laptop (8 GB VRAM), 32 GB RAM, yaln
 - [x] A/B için DPO v2 GGUF üretimi ve gerçek iki arka uçla deneme (anlamlı fark yok)
 - [x] Containerfile'lar, compose.yaml, K8s manifest'leri (kustomize) yazıldı ve yapısal olarak test edildi
 - [x] Podman (rootless, WSL2) ile imajlar derlendi, compose yığını çalıştırıldı: gateway → C++ konteyner → geçerli plan, Prometheus hedefleri/alarmlar, Grafana pano sorguları doğrulandı; Linux'ta C++ testleri 15/15
-- [ ] Kubernetes kümesinde çalıştırma ve kubeconform/promtool doğrulaması (küme yok, yapılmadı); GitHub Actions'ta CI çalıştırma (uzak depo yok)
+- [ ] Kubernetes kümesinde çalıştırma ve kubeconform/promtool doğrulaması (küme yok, yapılmadı)
 
 ## Sprint 3b (Faz 2)
 - [x] Niyet (10 sınıf) ve NER (8 tür): TF-IDF/kural taban çizgileri, BERTurk ince ayar
@@ -64,3 +64,4 @@ Kısıtlar: **ücretsiz** araçlar, RTX 4060 Laptop (8 GB VRAM), 32 GB RAM, yaln
 - [x] Few-shot prompt ile LLM özeti yeni tohumda yeniden ölçüldü (NOTAM düzeldi, METAR rakam hataları sürdü)
 - [x] llama-cpp-python taban çizgisi (aynı GGUF ve aynı llama.cpp DLL'leri), çıktı eşitliği ve GPU belleği: dil payı ~%6–7
 - [ ] Reranker denemesi
+- [x] GitHub deposu (özel) açıldı, CI yeşil (python + cpp)

@@ -43,7 +43,7 @@ C++ çıkarım servisi, A/B testi, izleme ve konteyner dağıtımı yer alır.
 | LLMOps: deney takibi, A/B, izleme | ✅ | `mlops/`, `serve/gateway.py`, `deploy/` | MLflow (registry kullanılmadı); A/B + Prometheus + Grafana |
 | Altyapı: konteyner | ✅ | `deploy/` | Podman'da derlendi, **compose yığını çalıştırıldı** |
 | Altyapı: Kubernetes | ⚠️ yarım | `deploy/k8s/` | Manifest'ler yazıldı, yapısal test; **kümeye uygulanmadı** |
-| Altyapı: GitHub Actions | ✅ | `.github/workflows/ci.yml` | Temiz ortamda taklit edildi; gerçek koşu push sonrası |
+| Altyapı: GitHub Actions | ✅ | `.github/workflows/ci.yml` | **GitHub'da yeşil** (Ubuntu): Python işi lint + mypy + pytest, C++ işi derleme + GoogleTest |
 | ARM / Jetson ölçümü | ❌ | | Donanım yok |
 | Tek komut demo | ✅ | `scripts/demo.ps1`, `deploy/compose.yaml` | |
 
@@ -118,6 +118,7 @@ Bu projede güvenilir sonuç almak için ölçümlerin kendisini defalarca düze
 | **Yük testi komut havuzu veri onarımından sonra değişmişti** | C++ ile Python geçerlilik farkı | C++ yeniden koşuldu; HF ölçümü yeniden yapılmadı (belgelendi) |
 | **C++ vs Python farkı "dil" sanılabilirdi** | Karışıklık analizi | Aynı GGUF/ikili ile ölçüm: dil payı ~%6–7 |
 | **CI mypy hatası** (torch CI'da kurulu değil, yerelde vardı) | CI'ı temiz ortamda taklit etme | Pushlamadan önce düzeltildi |
+| **İlk gerçek CI koşusunda 1 test kırmızı** (compose testi git'e girmeyen `outputs/gguf` klasörünü bekliyordu) | GitHub Actions | Test üretilen çıktıyı yok sayacak şekilde düzeltildi, taze klonda doğrulandı, ikinci koşu yeşil |
 | **Belgelerde yanlış sayılar** (NER seti 42/22 yazılmış, doğrusu 40/20) | Dosya başlığıyla çelişki | Düzeltildi, test eklendi |
 | **Kendi ön-incelemem iki kez eksik kaldı** (gri alan grupları sonradan bulundu) | Tarama + kullanıcı sorusu | Gri alanlar veri kartında; "hata yok" bulgusu zayıf kanıt olarak etiketlendi |
 

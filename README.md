@@ -1,5 +1,7 @@
 # SkyMind: Türkçe İHA Operatör Asistanı
 
+![CI](https://github.com/TunaKomurcu/skymind/actions/workflows/ci.yml/badge.svg)
+
 Operatörün Türkçe komutunu **doğrulanmış bir JSON görev planına** çeviren; bilgi eksik, belirsiz ya da yasaksa
 **uydurmak yerine netleştirme sorusu sorup reddeden** bir NLP/LLM **araştırma prototipi**.
 Yalnızca açık kaynak ve sentetik veri kullanır; gerçek operasyonel sistem iddiası yoktur.
