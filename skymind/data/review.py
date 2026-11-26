@@ -234,8 +234,15 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--stats", action="store_true")
     ap.add_argument("--export", action="store_true")
+    ap.add_argument("--web", action="store_true", help="tarayıcı arayüzünü başlat (önerilen)")
+    ap.add_argument("--port", type=int, default=8765)
+    ap.add_argument("--no-browser", action="store_true")
     a = ap.parse_args()
-    if a.stats:
+    if a.web:
+        from skymind.data.review_web import serve
+
+        serve(a.src, a.decisions, a.seed, a.port, open_browser=not a.no_browser)
+    elif a.stats:
         print(json.dumps(stats(a.src, a.decisions, a.seed), ensure_ascii=False))
     elif a.export:
         print(json.dumps(export(a.src, a.decisions, a.out, a.seed), ensure_ascii=False))

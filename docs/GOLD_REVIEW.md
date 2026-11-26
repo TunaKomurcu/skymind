@@ -3,13 +3,27 @@
 Amaç: 300 şablon-üretimli aday komutu insan gözüyle doğrulayıp `data/gold/gold.jsonl` üretmek. Bu olmadan
 planlayıcı sonuçları yalnızca sentetik test kümesinde kalır (sentetik veri ve aynı üretici dağılımı).
 
-## Başlatma (ayrı bir terminalde; Claude Code içindeki `!` istemi etkileşimli girdiyi desteklemez)
+## Hızlı yol: web arayüzü (önerilen, ~10 sn/aday)
+
+```bat
+cd C:\Users\Tuna\skymind
+uv run python -m skymind.data.review --web
+```
+
+Tarayıcıda `http://127.0.0.1:8765` açılır (yalnızca bu bilgisayardan erişilir). Her aday tek kartta: komut,
+sistemin vermesi gereken çıktı (okunur Türkçe, sayılar sarıyla vurgulu). **Klavyeyle:**
+`→` / `Enter` / `D` doğru, `←` / `N` hatalı, `S` atla, `Z` geri al, `E` komutu düzelt, `J` ham JSON.
+Her kararda otomatik diske yazılır; sekmeyi kapatıp sonra aynı komutla devam edebilirsin. Bitince terminalde
+`Ctrl+C` ile sunucuyu kapat.
+
+## Alternatif: terminal aracı (ayrı bir terminalde; Claude Code içindeki `!` istemi etkileşimli girdiyi desteklemez)
 
 ```bat
 cd C:\Users\Tuna\skymind
 uv run python -m skymind.data.review
 ```
 
+Web arayüzüyle terminal aracı **aynı dosyayı** (`gold_reviewed.jsonl`) kullanır, birini bırakıp diğerine geçebilirsin.
 İlerlemen her karardan sonra `data/gold/gold_reviewed.jsonl` dosyasına yazılır. İstediğin an `q` ile çık, aynı
 komutla kaldığın yerden devam edersin. Adaylar sabit bir sırayla karıştırılmıştır: **ilk N aday her zaman
 kategorilere dengeli dağılmış bir örnektir**, yani hepsini bitirmesen de (örn. ilk 100) temsilî bir küme çıkar.
