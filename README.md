@@ -56,7 +56,7 @@ yanlıştı ("yirmi beş m/s" için 20 m/s). Geçerli JSON doğru plan demek de�
   dil payı ~%6–7'dir. Python servisinin ana bellek (RAM) ölçümü geçersiz çıktı, raporlanmıyor.
 * Podman imajları derlendi ve compose yığını çalıştırıldı (yalnızca CPU, tek istek); **Kubernetes manifest'leri
   hiçbir kümeye uygulanmadı** (yalnızca yapısal testler). GitHub Actions'ta CI çalıştırılmadı.
-* NER elle sınama seti (42 cümle) asistan tarafından yazıldı. Atıf geçerliliği ölçüsü desteklenmeyi göstermez.
+* NER elle sınama seti (40 cümle) asistan tarafından yazıldı. Atıf geçerliliği ölçüsü desteklenmeyi göstermez.
 * Operasyonel güvenlik iddiası yoktur; uçuş uygunluk eşikleri prototip değerlerdir.
 
 ## Planlayıcı sonuçları (400 test örneği)

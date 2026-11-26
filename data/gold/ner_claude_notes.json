@@ -1,0 +1,5 @@
+{
+  "[Alfa|PLACE] ve [Bravo|PLACE] noktaları": "Claude emin değil: sınır tartışmalı. 'noktaları' etiket dışında bırakıldı çünkü iki ad ortak sözcüğü paylaşıyor. Alternatif: [Alfa|PLACE] ve [Bravo noktaları|PLACE]. Diğer cümlelerde 'Alfa noktasına' bütün etiketleniyor, yani tutarsızlık olabilir.",
+  "[doğu|DIR] yönünde": "Claude emin değil: 'yönünde' etiket dışında, 'doğu' çıplak yön sözcüğü. Alternatif: 'doğu yönünde' bütünüyle DIR. ('kuzeye', 'güneydoğuya' gibi eklerle bitişik biçimler bütün etiketleniyor.)",
+  "[baraj|PLACE] bölgesini": "Düşük risk: 'bölgesini' etiket dışında (veri üreticisinde yer adı 'baraj'). 'Charlie noktası çevresinde' gibi adın parçası olan sözcük ise içeride."
+}

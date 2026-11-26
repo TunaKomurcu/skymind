@@ -130,7 +130,12 @@ class ReviewState:
         return {"undone": cid}
 
 
-def make_handler(state: ReviewState) -> type[BaseHTTPRequestHandler]:
+ROUTES = ("decide", "undo", "reason", "clear_after")  # durum nesnesinin sunabileceği POST uçları
+
+
+def make_handler(state: Any, page: Path = PAGE) -> type[BaseHTTPRequestHandler]:
+    """Genel inceleme sunucusu: ``state`` snapshot() ve ROUTES'tan istediği yöntemleri sunar."""
+
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, format: str, *args: Any) -> None:  # sessiz
             pass
@@ -154,7 +159,7 @@ def make_handler(state: ReviewState) -> type[BaseHTTPRequestHandler]:
             if not self._host_ok():
                 return self._json(HTTPStatus.FORBIDDEN, {"error": "host"})
             if self.path in ("/", "/index.html"):
-                return self._send(200, PAGE.read_bytes(), "text/html; charset=utf-8")
+                return self._send(200, page.read_bytes(), "text/html; charset=utf-8")
             if self.path == "/api/state":
                 return self._json(200, state.snapshot())
             self._json(HTTPStatus.NOT_FOUND, {"error": "yok"})
@@ -169,14 +174,10 @@ def make_handler(state: ReviewState) -> type[BaseHTTPRequestHandler]:
                 body = json.loads(self.rfile.read(n))
                 if not isinstance(body, dict):
                     raise ValueError("nesne bekleniyordu")
-                if self.path == "/api/decide":
-                    return self._json(200, state.decide(body))
-                if self.path == "/api/undo":
-                    return self._json(200, state.undo(body))
-                if self.path == "/api/reason":
-                    return self._json(200, state.reason(body))
-                if self.path == "/api/clear_after":
-                    return self._json(200, state.clear_after(body))
+                name = self.path.removeprefix("/api/")
+                fn = getattr(state, name, None) if name in ROUTES else None
+                if fn is not None and self.path.startswith("/api/"):
+                    return self._json(200, fn(body))
             except (ValueError, json.JSONDecodeError) as e:
                 return self._json(HTTPStatus.BAD_REQUEST, {"error": str(e)})
             self._json(HTTPStatus.NOT_FOUND, {"error": "yok"})
@@ -187,8 +188,13 @@ def make_handler(state: ReviewState) -> type[BaseHTTPRequestHandler]:
 def serve(
     src: Path, decisions_path: Path, seed: int = 0, port: int = 8765, open_browser: bool = True
 ) -> None:
-    state = ReviewState(src, decisions_path, seed)
-    httpd = ThreadingHTTPServer(("127.0.0.1", port), make_handler(state))
+    serve_state(ReviewState(src, decisions_path, seed), PAGE, decisions_path, port, open_browser)
+
+
+def serve_state(
+    state: Any, page: Path, decisions_path: Path, port: int = 8765, open_browser: bool = True
+) -> None:
+    httpd = ThreadingHTTPServer(("127.0.0.1", port), make_handler(state, page))
     url = f"http://127.0.0.1:{port}"
     print(f"İnceleme arayüzü: {url}  (kapatmak için Ctrl+C)")
     print(f"Kararlar buraya yazılır: {decisions_path}")
