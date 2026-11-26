@@ -126,7 +126,10 @@ def test_compose_paths_and_services_are_consistent() -> None:
             assert dep in c["services"]
         for v in svc.get("volumes", []):
             host = v.split(":")[0]
-            assert (DEPLOY / host).exists(), (name, host)
+            resolved = (DEPLOY / host).resolve()
+            if resolved.is_relative_to((DEPLOY.parent / "outputs").resolve()):
+                continue  # outputs/ üretilen çıktıdır (git'e girmez, CI'da yoktur)
+            assert resolved.exists(), (name, host)
     static = yaml.safe_load((DEPLOY / "prometheus/prometheus.yml").read_text(encoding="utf-8"))
     targets = {
         t.split(":")[0]
