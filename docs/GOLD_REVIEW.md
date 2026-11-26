@@ -20,7 +20,7 @@ Dürüstlük notları (rapora girer):
 ## Hızlı yol: web arayüzü (önerilen, ~10 sn/aday)
 
 ```bat
-cd C:\Users\Tuna\skymind
+cd skymind
 uv run python -m skymind.data.review --web
 ```
 
@@ -33,7 +33,7 @@ Her kararda otomatik diske yazılır; sekmeyi kapatıp sonra aynı komutla devam
 ## Alternatif: terminal aracı (ayrı bir terminalde; Claude Code içindeki `!` istemi etkileşimli girdiyi desteklemez)
 
 ```bat
-cd C:\Users\Tuna\skymind
+cd skymind
 uv run python -m skymind.data.review
 ```
 
